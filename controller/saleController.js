@@ -68,10 +68,11 @@ class saleController {
   TopSku = async (req, res) => {
     try {
       const response = await saleService.topSellingProducts();
+
       if (!response) {
         return Response.notfound(res, messageUtil.NOT_FOUND);
       }
-      Response.success(res, response, messageUtil.SUCCESS);
+      Response.success(res, messageUtil.OK, response);
     } catch (error) {
       Response.serverError(res, error);
     }

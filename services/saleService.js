@@ -58,72 +58,83 @@ class saleCRUD {
   };
 
   topSellingProducts = async () => {
-    const topSellingSKUs = await Sale.aggregate([
-      // Optional: Filter by date
-      // {
-      //   $match: {
-      //     saleDate: { $gte: new Date("2024-01-01"), $lte: new Date("2024-12-31") }
-      //   }
-      // },
+    try {
+      const topSellingSKUs = await Sale.aggregate([
+        // Optional: Date filter
+        // {
+        //   $match: {
+        //     saleDate: { $gte: new Date("2024-01-01"), $lte: new Date("2024-12-31") }
+        //   }
+        // },
 
-      // Step 1: Group by SKU
-      {
-        $group: {
-          _id: "$sku",
-          totalUnitsSold: { $sum: "$unitsSold" },
-          totalSalesAmount: { $sum: "$salesAmount" },
+        // Step 1: Group by SKU
+        {
+          $group: {
+            _id: "$sku",
+            totalUnitsSold: { $sum: "$unitsSold" },
+            totalSalesAmount: { $sum: "$sales" },
+          },
         },
-      },
 
-      // Step 2: Sort & limit
-      { $sort: { totalUnitsSold: -1 } },
-      { $limit: 10 },
+        // Step 2: Sort and limit
+        { $sort: { totalUnitsSold: -1 } },
+        { $limit: 10 },
 
-      // Step 3: Join with Inventory (has size, color, price, productId)
-      {
-        $lookup: {
-          from: "inventories",
-          localField: "sku",
-          foreignField: "sku",
-          as: "inventory",
+        // Step 3: Join with Inventory (one match per SKU)
+        {
+          $lookup: {
+            from: "inventories",
+            let: { sku: "$_id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$sku", "$$sku"] } } },
+              { $limit: 1 },
+            ],
+            as: "inventory",
+          },
         },
-      },
-      { $unwind: "$inventory" },
+        { $unwind: { path: "$inventory", preserveNullAndEmptyArrays: true } },
 
-      // Step 4: Join with Product
-      {
-        $lookup: {
-          from: "products",
-          localField: "sku",
-          foreignField: "sku",
-          as: "product",
+        // Step 4: Join with Product (one match per SKU)
+        {
+          $lookup: {
+            from: "products",
+            let: { sku: "$_id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$sku", "$$sku"] } } },
+              { $limit: 1 },
+            ],
+            as: "product",
+          },
         },
-      },
-      { $unwind: "$product" },
+        { $unwind: { path: "$product", preserveNullAndEmptyArrays: true } },
 
-      // Step 5: Final shape
-      {
-        $project: {
-          sku: "$_id",
-          totalUnitsSold: 1,
-          totalSalesAmount: 1,
+        // Step 5: Final projection
+        {
+          $project: {
+            sku: "$_id",
+            totalUnitsSold: 1,
+            totalSalesAmount: 1,
 
-          // From Inventory
-          size: "$inventory.size",
-          color: "$inventory.color",
-          price: "$inventory.price",
-          currentInventory: "$inventory.currentInventory",
+            // Inventory fields
+            size: "$inventory.size",
+            color: "$inventory.color",
+            price: "$inventory.price",
+            currentInventory: "$inventory.currentInventory",
 
-          // From Product
-          productTitle: "$product.title",
-          category: "$product.category",
-          subcategory: "$product.subcategory",
-          material: "$product.material",
-          genderAge: "$product.genderAge",
+            // Product fields
+            productTitle: "$product.title",
+            category: "$product.category",
+            subcategory: "$product.subcategory",
+            material: "$product.material",
+            genderAge: "$product.genderAge",
+          },
         },
-      },
-    ]);
-    return topSellingSKUs;
+      ]);
+      return topSellingSKUs;
+    } catch (err) {
+      console.error("Error in topSellingProducts:", err);
+      return [];
+    }
   };
 }
 export default new saleCRUD();
