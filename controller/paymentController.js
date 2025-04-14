@@ -78,15 +78,12 @@ class paymentController {
   };
   paymentIntent = async (req, res) => {
     try {
+      console.log("Request Body:", req.body);
       const { amount, currency, paymentMethodId, userId, type } = req.body;
 
       if (!userId) {
         return Response.badRequest(res, messageUtil.REQUIRED_USER_ID);
-        // return res
-        //   .status(400)
-        //   .json({ success: false, error: 'User ID is required' });
       }
-
       const paymentIntent = await stripe.paymentIntents.create({
         amount, // Amount in cents
         currency,
