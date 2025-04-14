@@ -12,6 +12,7 @@ class alertCRUD {
     }
     let skip = (currentPage - 1) * 10;
     delete query.page;
+    console.log(query);
     let alert = await alertSchema
       .find(query)
       .populate({
@@ -23,7 +24,7 @@ class alertCRUD {
         select: "productId stock stockOutDate stockInDate weeklyDemand",
         populate: {
           path: "productId",
-          select: "sku name",
+          select: "sku name stock weeklyDemand",
         },
       })
       .skip(skip)
