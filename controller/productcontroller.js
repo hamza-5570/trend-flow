@@ -5,8 +5,8 @@ import mongoose from "mongoose";
 import csv from "csv-parser";
 import fs from "fs";
 import Stripe from "stripe";
-const dotenv = await import("dotenv");
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Replace with your Stripe secret key
+import dotenv from "dotenv";
+dotenv.config(); // Load environment variables from .env file
 
 import productService from "../services/productService.js";
 
@@ -174,47 +174,6 @@ class productController {
     } catch (error) {
       // return response of error
       return Response.serverError(res, error);
-    }
-  };
-  productCheckout = async (req, res) => {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: { name: "Sample Product" },
-            unit_amount: 2000, // Amount in cents ($20.00)
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: "http://localhost:3000/success",
-      cancel_url: "http://localhost:3000/cancel",
-    });
-    // res.redirect(session.url);
-    res.json(session.url);
-  };
-  paymentIntent = async (req, res) => {
-    try {
-      const { amount, currency, paymentMethodId } = req.body;
-
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount, // Amount in cents (e.g., 10 USD = 1000)
-        currency,
-        payment_method: paymentMethodId,
-        confirm: true,
-        return_url: "https://wishpostings.com/", // Automatically confirm the payment
-      });
-
-      res.send({
-        success: true,
-        clientSecret: paymentIntent.client_secret,
-      });
-    } catch (error) {
-      return Response.serverError(res, error);
-      // res.status(500).send({ success: false, error: error.message });
     }
   };
 

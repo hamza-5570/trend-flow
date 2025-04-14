@@ -25,14 +25,11 @@ routes.get("/", productController.getAllProduct);
 routes.get("/:productId", productController.getByID);
 routes.patch("/:productId", productController.productUpdate);
 routes.delete("/:productId", productController.productDelete);
-routes.post("/checkout", productController.productCheckout);
 routes.get("/user-products/:userId", productController.getUserProducts);
 routes.get(
   "/userproducts/:userId",
   authmiddleware.authenticateUser,
   productController.getUserProducts
 );
-routes.post("/create-checkout-session", productController.productCheckout);
-routes.post("/create-payment-intent", productController.paymentIntent);
 
 export default routes;
