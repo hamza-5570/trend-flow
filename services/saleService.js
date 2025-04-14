@@ -119,8 +119,9 @@ class saleCRUD {
             size: "$inventory.size",
             color: "$inventory.color",
             price: "$inventory.price",
+            stock: "$inventory.stock",
             currentInventory: "$inventory.currentInventory",
-
+            stockInDate: "$inventory.stockInDate",
             // Product fields
             productTitle: "$product.title",
             category: "$product.category",
