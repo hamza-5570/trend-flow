@@ -9,5 +9,9 @@ routes.post(
   csvUploadMiddleware,
   saleController.createSaleWithCSV
 );
-
+routes.get(
+  "/top-selling-products",
+  // authToken.authenticateUser,
+  saleController.TopSku
+);
 export default routes;

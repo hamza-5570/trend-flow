@@ -21,9 +21,6 @@ class productCRUD {
   deleteProduct = async (query) => {
     return await Product.findOneAndDelete(query);
   };
-  filter = async (query) => {
-    return await Product.find(query);
-  };
   getTopSkus = async () => {
     return await Product.aggregate([
       {
