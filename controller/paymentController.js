@@ -1,10 +1,10 @@
-import Response from '../utilities/response.js';
-import messageUtil from '../utilities/message.js';
-import userServices from '../services/userService.js';
-import paymentServices from '../services/paymentService.js';
-import Payment from '../model/payment.js';
-import Stripe from 'stripe';
-const dotenv = await import('dotenv');
+import Response from "../utilities/response.js";
+import messageUtil from "../utilities/message.js";
+import userServices from "../services/userService.js";
+import paymentServices from "../services/paymentService.js";
+import Payment from "../model/payment.js";
+import Stripe from "stripe";
+const dotenv = await import("dotenv");
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Replace with your Stripe secret key
 
 class paymentController {
@@ -30,7 +30,7 @@ class paymentController {
       const response = await paymentServices.findAll(req.query);
       Response.success(res, response, messageUtil.SUCCESS);
     } catch (error) {
-      Response.error(res, error);
+      Response.serverError(res, error);
     }
   };
 
@@ -39,7 +39,7 @@ class paymentController {
       const response = await paymentServices.findPayment(req.query);
       Response.success(res, response, messageUtil.SUCCESS);
     } catch (error) {
-      Response.error(res, error);
+      Response.serverError(res, error);
     }
   };
 
@@ -50,7 +50,7 @@ class paymentController {
       );
       Response.success(res, response, messageUtil.SUCCESS);
     } catch (error) {
-      Response.error(res, error);
+      Response.serverError(res, error);
     }
   };
 
@@ -62,7 +62,7 @@ class paymentController {
       );
       Response.success(res, response, messageUtil.SUCCESS);
     } catch (error) {
-      Response.error(res, error);
+      Response.serverError(res, error);
     }
   };
 
@@ -73,7 +73,7 @@ class paymentController {
       );
       Response.success(res, response, messageUtil.SUCCESS);
     } catch (error) {
-      Response.error(res, error);
+      Response.serverError(res, error);
     }
   };
   paymentIntent = async (req, res) => {
@@ -92,7 +92,7 @@ class paymentController {
         currency,
         payment_method: paymentMethodId,
         confirm: true,
-        return_url: 'https://wishpostings.com/', // Automatically confirm the payment
+        return_url: "https://wishpostings.com/", // Automatically confirm the payment
       });
 
       // Save payment details
@@ -107,7 +107,7 @@ class paymentController {
       });
 
       // Update user subscription only if payment succeeds
-      if (paymentIntent.status === 'succeeded') {
+      if (paymentIntent.status === "succeeded") {
         await userServices.updateUser({ _id: userId }, { isSubscribed: true });
       }
 
@@ -118,7 +118,7 @@ class paymentController {
         paymentData,
       });
     } catch (error) {
-      console.error('Payment Error:', error);
+      console.error("Payment Error:", error);
       return Response.serverError(res, error);
     }
   };
