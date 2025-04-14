@@ -13,13 +13,12 @@ class saleController {
         if (!product) {
           await notificationService.createNotification({
             message: `Product ${sale.ProductTitle} is not availabe in our database`,
-            productId: sale.Productid,
             userId: req.user._id,
           });
         } else {
           let sales = await saleService.createSale({
             sku: sale.SKU,
-            productId: new mongoose.Types.ObjectId(sale.Productid),
+            id: sale.Productid,
             orderId: sale.OrderId,
             unitsSold: sale.UnitsSold,
             sales: sale.Sales,
