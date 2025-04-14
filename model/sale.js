@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 const saleSchema = new Schema(
   {
     sku: { type: String, required: true },
-    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
+    id: { type: String, required: true },
     variantId: { type: Schema.Types.ObjectId, ref: "Variant" },
     orderId: { type: String, required: true },
     unitsSold: { type: Number, required: true },
