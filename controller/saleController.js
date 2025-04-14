@@ -9,7 +9,7 @@ class saleController {
   createSaleWithCSV = async (req, res) => {
     try {
       const salePromises = req.csvData.map(async (sale) => {
-        let product = await productService.filter({ sku: sale.SKU });
+        let product = await productService.findProduct({ sku: sale.SKU });
         if (!product) {
           await notificationService.createNotification({
             message: `Product ${sale.ProductTitle} is not availabe in our database`,
@@ -32,7 +32,7 @@ class saleController {
 
           let inventory = await inventoryService.updateInventory(
             {
-              productId: new mongoose.Types.ObjectId(sale.Productid),
+              sku: sale.SKU,
               size: sale.Size,
               color: sale.Color,
               reorderPoint: sale.ReorderPoint,

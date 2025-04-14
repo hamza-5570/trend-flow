@@ -94,8 +94,8 @@ class saleCRUD {
       {
         $lookup: {
           from: "products",
-          localField: "inventory.productId",
-          foreignField: "productId",
+          localField: "sku",
+          foreignField: "sku",
           as: "product",
         },
       },
