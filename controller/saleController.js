@@ -67,7 +67,7 @@ class saleController {
       });
 
       await Promise.all(salePromises);
-      Response.success(res, messageUtil.SUCCESS);
+      Response.success(res, response.data.message);
     } catch (error) {
       // return the response of server error
       return Response.serverError(res, error);
