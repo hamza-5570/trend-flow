@@ -9,7 +9,6 @@ import inventoryService from "../services/inventoryService.js";
 class saleController {
   createSaleWithCSV = async (req, res) => {
     try {
-      console.log("CSV Data", req.file);
       const form = new FormData();
 
       form.append("file", req.file.buffer, {
@@ -26,8 +25,6 @@ class saleController {
           },
         }
       );
-
-      console.log("Upload successful:", response.data);
       const salePromises = req.csvData.map(async (sale) => {
         let product = await productService.findProduct({ sku: sale.SKU });
         if (!product) {
@@ -36,7 +33,7 @@ class saleController {
             userId: req.user._id,
           });
         } else {
-          let sales = await saleService.createSale({
+          await saleService.createSale({
             sku: sale.SKU,
             id: sale.Productid,
             orderId: sale.OrderId,
@@ -48,9 +45,7 @@ class saleController {
             priceAtSale: sale.Price,
           });
 
-          console.log("Sales Created", sales);
-
-          let inventory = await inventoryService.updateInventory(
+          await inventoryService.updateInventory(
             {
               sku: sale.SKU,
               size: sale.Size,
@@ -61,8 +56,6 @@ class saleController {
               stock: sale.CurrentInventory,
             }
           );
-
-          console.log("Inventory Updated", inventory);
         }
       });
 
