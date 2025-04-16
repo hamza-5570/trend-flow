@@ -12,7 +12,6 @@ class alertCRUD {
     }
     let skip = (currentPage - 1) * 10;
     delete query.page;
-    console.log(query);
     let alert = await alertSchema
       .find(query)
       .populate({

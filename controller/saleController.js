@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import axios from "axios";
+import FormData from "form-data";
 import Response from "../utilities/response.js";
 import messageUtil from "../utilities/message.js";
 import saleService from "../services/saleService.js";
@@ -8,6 +9,25 @@ import inventoryService from "../services/inventoryService.js";
 class saleController {
   createSaleWithCSV = async (req, res) => {
     try {
+      console.log("CSV Data", req.file);
+      const form = new FormData();
+
+      form.append("file", req.file.buffer, {
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+      });
+
+      const response = await axios.post(
+        "http://0.0.0.0:8000/upload-train-data",
+        form,
+        {
+          headers: {
+            authorization: "hashbin2",
+          },
+        }
+      );
+
+      console.log("Upload successful:", response.data);
       const salePromises = req.csvData.map(async (sale) => {
         let product = await productService.findProduct({ sku: sale.SKU });
         if (!product) {
