@@ -42,17 +42,23 @@ class inventoryController {
 
   uploadInventory = async (req, res) => {
     try {
+      const formatDateToMidnightISOString = (date) => {
+        const d = new Date(date);
+        d.setUTCHours(0, 0, 0, 0); // set to midnight UTC
+        return d.toISOString(); // returns format like "2023-09-18T00:00:00.000Z"
+      };
       const forecastBaseUrl = "http://0.0.0.0:8000/make-forecast";
-
       for (const item of req.csvData) {
+        console.log("Item:", item);
         // 1. Check if inventory exists
         let inventory = await inventoryServices.findInventoryId({
-          sku: item.sku,
+          sku: item.SKU,
         });
 
         if (!inventory) {
           inventory = await inventoryServices.createInventory({
-            sku: item.sku,
+            sku: item.SKU,
+            userId: req.userId,
             stock: item.CurrentInventory,
             price: item.Price,
             stockInDate: Date.now(),
@@ -64,7 +70,7 @@ class inventoryController {
           });
         } else {
           await inventoryServices.updateInventory(
-            { sku: item.sku },
+            { sku: item.SKU },
             {
               stock: item.CurrentInventory,
               stockInDate: Date.now(),
@@ -76,74 +82,78 @@ class inventoryController {
               reorderPoint: item.ReorderPoint,
             }
           );
-        }
 
-        // 2. Check if sales exist for SKU
-        const sales = await saleService.findSale({ sku: item.sku });
+          // 2. Check if sales exist for SKU
+          const sales = await saleService.findSale({ sku: item.SKU });
 
-        if (sales) {
-          // 3. Prepare forecast payload
-          const forecastPayload = [
-            {
-              sku: item.sku,
-              product_title: item.description,
-              category: item.category,
-              subcategory: item.subcategory,
-              price: item.price,
-              material: item.material,
-              gender_age: item.gender_age,
-              current_inventory: item.stock,
-              start_day: Date.now(),
-              end_day: Date.now() + 1000 * 60 * 60 * 24 * 90, // 90 days
-            },
-          ];
+          if (sales) {
+            // 3. Prepare forecast payload
+            const forecastPayload = {
+              // sku: item.SKU,
+              sku: "162-2477",
+              product_title: item.ProductTitle,
+              category: item.Category,
+              subcategory: item.Subcategory,
+              price: parseInt(item.Price),
+              material: item.Material,
+              gender_age: item.Gender_Age,
+              current_inventory: parseInt(item.CurrentInventory),
+              lead_time: 1,
+              safety_stock: 10,
+              start_day: formatDateToMidnightISOString(Date.now()),
+              end_day: formatDateToMidnightISOString(
+                Date.now() + 1000 * 60 * 60 * 24 * 90
+              ), // 90 days later
+            };
 
-          // 4. Send to Forecast API
-          const forecastResponse = await axios.post(
-            forecastBaseUrl,
-            forecastPayload,
-            {
-              headers: {
-                authorization: "hashbin2",
-              },
-            }
-          );
-
-          const sumForecast = (arr) =>
-            arr.reduce((sum, entry) => sum + (entry.forecast || 0), 0);
-
-          // Destructure the response
-          const [reorderMessage, overstockMessage, forecastArray] =
-            forecastResponse.data;
-
-          // Safely slice and calculate
-          const days_demand_30 = sumForecast(forecastArray.slice(0, 30));
-          const days_demand_60 = sumForecast(forecastArray.slice(0, 60));
-          const days_demand_90 = sumForecast(forecastArray.slice(0, 90));
-
-          // 6. Prepare forecast payload for DB
-          const forecastPayloadForDB = {
-            sku: item.sku,
-            userId: req.user._id,
-            category: item.category,
-            forcast_demand: demandForecast,
-            days_demand_30,
-            days_demand_60,
-            days_demand_90,
-          };
-
-          // 7. Save or Update Forecast
-          const existingForecast = await forcastServices.findForcast({
-            sku: item.sku,
-          });
-
-          if (existingForecast) {
-            await forcastServices.updateForcast(
-              { sku: item.sku, userId: req.user._id },
-              forecastPayloadForDB
+            console.log("Forecast Payload:", forecastPayload);
+            // 4. Send to Forecast API
+            const forecastResponse = await axios.post(
+              forecastBaseUrl,
+              forecastPayload,
+              {
+                headers: {
+                  authorization: "hashbin2",
+                },
+              }
             );
-          } else {
-            await forcastServices.createForcast(forecastPayloadForDB);
+            console.log(forecastResponse.data);
+            const sumForecast = (arr) =>
+              arr.reduce((sum, entry) => sum + (entry.forecast || 0), 0);
+
+            // Destructure the response
+            const [reorderMessage, overstockMessage, forecastArray] =
+              forecastResponse.data;
+
+            // Safely slice and calculate
+            const days_demand_30 = sumForecast(forecastArray.slice(0, 30));
+            const days_demand_60 = sumForecast(forecastArray.slice(0, 60));
+            const days_demand_90 = sumForecast(forecastArray.slice(0, 90));
+            const demandForecast = sumForecast(forecastArray);
+            // 6. Prepare forecast payload for DB
+            const forecastPayloadForDB = {
+              sku: item.SKU,
+              userId: req.userId,
+              category: item.Category,
+              forcast_demand: demandForecast,
+              days_demand_30,
+              days_demand_60,
+              days_demand_90,
+            };
+
+            // 7. Save or Update Forecast
+            const existingForecast = await forcastServices.findForcast({
+              sku: item.SKU,
+            });
+
+            if (existingForecast) {
+              await forcastServices.updateForcast(
+                { sku: item.SKU, userId: req.userId },
+                forecastPayloadForDB
+              );
+            } else {
+              await forcastServices.createForcast(forecastPayloadForDB);
+            }
           }
         }
       }

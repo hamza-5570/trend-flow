@@ -46,9 +46,7 @@ class inventoryCRUD {
     });
   };
   findInventoryId = async (query) => {
-    return await inventorySchema
-      .findOne(query)
-      .populate("product", "name price");
+    return await inventorySchema.findOne(query);
   };
   updateInventory = async (query, data) => {
     return await inventorySchema.findOneAndUpdate(query, data, { new: true });
