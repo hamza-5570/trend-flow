@@ -89,8 +89,7 @@ class inventoryController {
           if (sales) {
             // 3. Prepare forecast payload
             const forecastPayload = {
-              // sku: item.SKU,
-              sku: "162-2477",
+              sku: item.SKU,
               product_title: item.ProductTitle,
               category: item.Category,
               subcategory: item.Subcategory,
