@@ -1,26 +1,54 @@
-import inventorySchema from '../model/inventory.js';
+import inventorySchema from "../model/inventory.js";
 
 class inventoryCRUD {
   createInventory = async (query) => {
     return await inventorySchema.create(query);
   };
   findAll = async (query) => {
-    return await inventorySchema
-      .find(query)
-      .populate('product', ' sku name price');
+    const inventory = await inventorySchema.aggregate([
+      {
+        $lookup: {
+          from: "products",
+          localField: "sku",
+          foreignField: "sku",
+          as: "product",
+        },
+      },
+      {
+        $unwind: "$product",
+      },
+      {
+        $match: query,
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ["$product", "$$ROOT"],
+          },
+        },
+      },
+      {
+        $project: {
+          product: 0, // remove the original product field if it still exists
+          __v: 0, // optional: remove mongoose versioning fields
+        },
+      },
+    ]);
+
+    return inventory;
   };
   findInventory = async (query) => {
     return await inventorySchema.findOne(query).populate({
-      path: 'product',
+      path: "product",
       match: {
-        type: 'sku',
+        type: "sku",
       },
     });
   };
   findInventoryId = async (query) => {
     return await inventorySchema
       .findOne(query)
-      .populate('product', 'name price');
+      .populate("product", "name price");
   };
   updateInventory = async (query, data) => {
     return await inventorySchema.findOneAndUpdate(query, data, { new: true });
@@ -29,7 +57,7 @@ class inventoryCRUD {
     return await inventorySchema.findOneAndDelete(query);
   };
   filterFind = async (query) => {
-    return await inventorySchema.findOne(query).populate('product', 'name sku');
+    return await inventorySchema.findOne(query).populate("product", "name sku");
   };
 }
 export default new inventoryCRUD();

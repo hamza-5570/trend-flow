@@ -1,38 +1,24 @@
-import express from 'express';
+import express from "express";
 const routes = express.Router();
-import multer from 'multer';
-import inventoryController from '../controller/inventoryController.js';
+import inventoryController from "../controller/inventoryController.js";
 // import inventoryValid from "../validation/inventoryValid.js";
-import middleware from '../middleware/auth.js';
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Save files in 'uploads' folder
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
-});
-const upload = multer({ storage });
+import { csvUploadMiddleware } from "../middleware/readCsv.js";
+import middleware from "../middleware/auth.js";
 
 routes.post(
-  '/create',
+  "/create",
   middleware.authenticateToken,
   //   inventoryValid.createInventory,
   inventoryController.createInventory
 );
-routes.get('/all', inventoryController.findAll);
-routes.get('/find', inventoryController.findInventoryId);
-routes.patch('/:inventoryId', inventoryController.updateInventory);
-routes.delete('/:inventoryId', inventoryController.deleteInventory);
+routes.get("/all", inventoryController.findAll);
+routes.get("/find", inventoryController.findInventoryId);
+routes.patch("/:inventoryId", inventoryController.updateInventory);
+routes.delete("/:inventoryId", inventoryController.deleteInventory);
 routes.post(
-  '/upload',
-  upload.single('file'),
-  middleware.authenticateUser,
-  inventoryController.updateInventoryByCSV
+  "/uploadInventory",
+  middleware.authenticateToken,
+  csvUploadMiddleware,
+  inventoryController.uploadInventory
 );
-routes.get('/lowstock', inventoryController.LowStock);
-routes.post('/update', inventoryController.UpdateStock);
-routes.get('/find-inventory/:productId', inventoryController.findInventory);
-routes.get('/high-stock', inventoryController.HighStock);
 export default routes;

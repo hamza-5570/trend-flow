@@ -2,11 +2,6 @@ import { Schema, model } from "mongoose";
 
 const inventorySchema = new Schema(
   {
-    productId: {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
     sku: {
       type: String,
       required: true,
@@ -38,6 +33,14 @@ const inventorySchema = new Schema(
     },
     gender_age: {
       type: String,
+    },
+    lead_time: {
+      type: Number,
+      default: 7,
+    },
+    safety_stock: {
+      type: Number,
+      default: 20,
     },
     reorderPoint: {
       type: Number,
