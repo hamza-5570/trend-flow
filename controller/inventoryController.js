@@ -47,7 +47,8 @@ class inventoryController {
         d.setUTCHours(0, 0, 0, 0); // set to midnight UTC
         return d.toISOString(); // returns format like "2023-09-18T00:00:00.000Z"
       };
-      const forecastBaseUrl = "http://0.0.0.0:8000/make-forecast";
+      const forecastBaseUrl =
+        "https://stock-ml-model.onrender.com/make-forecast";
       for (const item of req.csvData) {
         console.log("Item:", item);
         // 1. Check if inventory exists

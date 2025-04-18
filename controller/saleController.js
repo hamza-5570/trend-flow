@@ -17,7 +17,7 @@ class saleController {
       });
 
       const response = await axios.post(
-        "http://0.0.0.0:8000/upload-train-data",
+        "https://stock-ml-model.onrender.com/upload-train-data",
         form,
         {
           headers: {
