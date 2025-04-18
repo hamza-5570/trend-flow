@@ -13,7 +13,6 @@ routes.post(
 );
 routes.get("/all", inventoryController.findAll);
 routes.get("/find", inventoryController.findInventoryId);
-routes.patch("/:inventoryId", inventoryController.updateInventory);
 routes.delete("/:inventoryId", inventoryController.deleteInventory);
 routes.post(
   "/uploadInventory",

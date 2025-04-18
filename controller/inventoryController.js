@@ -109,23 +109,23 @@ class inventoryController {
             }
           );
 
-          // 5. Handle Forecast Response
-          const forecastData = forecastResponse.data;
-          const reorderMessage = forecastData[0] || "";
-          const overstockMessage = forecastData[1] || "";
-          const demandForecast = forecastData[2] || [];
+          const sumForecast = (arr) =>
+            arr.reduce((sum, entry) => sum + (entry.forecast || 0), 0);
 
-          const days_demand_30 = demandForecast.slice(0, 30);
-          const days_demand_60 = demandForecast.slice(0, 60);
-          const days_demand_90 = demandForecast.slice(0, 90);
+          // Destructure the response
+          const [reorderMessage, overstockMessage, forecastArray] =
+            forecastResponse.data;
+
+          // Safely slice and calculate
+          const days_demand_30 = sumForecast(forecastArray.slice(0, 30));
+          const days_demand_60 = sumForecast(forecastArray.slice(0, 60));
+          const days_demand_90 = sumForecast(forecastArray.slice(0, 90));
 
           // 6. Prepare forecast payload for DB
           const forecastPayloadForDB = {
             sku: item.sku,
             userId: req.user._id,
             category: item.category,
-            reorder_message: reorderMessage,
-            overstock_message: overstockMessage,
             forcast_demand: demandForecast,
             days_demand_30,
             days_demand_60,
