@@ -6,6 +6,7 @@ import saleService from "../services/saleService.js";
 import productService from "../services/productService.js";
 import notificationService from "../services/notificationService.js";
 import inventoryService from "../services/inventoryService.js";
+import alertService from "../services/alertService.js";
 class saleController {
   createSaleWithCSV = async (req, res) => {
     try {
@@ -45,7 +46,7 @@ class saleController {
             priceAtSale: sale.Price,
           });
 
-          await inventoryService.updateInventory(
+          let inventory = await inventoryService.updateInventory(
             {
               sku: sale.SKU,
               size: sale.Size,
@@ -56,6 +57,13 @@ class saleController {
               stock: sale.CurrentInventory,
             }
           );
+          if (inventory.stock <= 0) {
+            await alertService.createAlert({
+              sku: sale.SKU,
+              user: req.user._id,
+              alertType: "stockout",
+            });
+          }
         }
       });
 

@@ -7,9 +7,8 @@ const alertSchema = new Schema(
       ref: "User",
       required: true,
     },
-    inventory: {
-      type: Schema.Types.ObjectId,
-      ref: "Inventory",
+    sku: {
+      type: String,
       required: true,
     },
     type: {
