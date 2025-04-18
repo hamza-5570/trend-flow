@@ -17,13 +17,15 @@ class alertController {
 
   findAll = async (req, res) => {
     try {
+      console.log("req.query", req.userId);
       const response = await alertServices.findAll({
-        user: req.user._id,
+        user: req.userId,
         ...req.query,
       });
-      if (response.alert.length === 0) {
-        return Response.notfound(res, messageUtil.NOT_FOUND);
-      }
+      console.log("response", response);
+      // if (response.alert.length === 0) {
+      //   return Response.notfound(res, messageUtil.NOT_FOUND);
+      // }
 
       return Response.success(res, response, messageUtil.SUCCESS);
     } catch (error) {

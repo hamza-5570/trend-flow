@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import alertSchema from "../model/alert.js";
 
 class alertCRUD {
@@ -5,34 +6,55 @@ class alertCRUD {
     return await alertSchema.create(query);
   };
   findAll = async (query) => {
-    let currentPage = 1;
-    let page = query.page;
-    if (page) {
-      currentPage = page;
+    const { page = 1, limit = 10, ...filters } = query;
+
+    // Convert string ID to ObjectId
+    if (filters.user) {
+      filters.user = new mongoose.Types.ObjectId(filters.user);
     }
-    let skip = (currentPage - 1) * 10;
-    delete query.page;
-    let alert = await alertSchema
-      .find(query)
-      .populate({
-        path: "user",
-        select: "name email",
-      })
-      .populate({
-        path: "inventory",
-        select: "productId stock stockOutDate stockInDate weeklyDemand",
-        populate: {
-          path: "productId",
-          select: "sku name stock weeklyDemand",
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+
+    const totalItems = await alertSchema.countDocuments(filters);
+
+    const alerts = await alertSchema.aggregate([
+      {
+        $match: filters,
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "sku",
+          foreignField: "sku",
+          as: "product",
         },
-      })
-      .skip(skip)
-      .limit(10)
-      .select("-__v");
-    let total = await alertSchema.countDocuments(query);
-    let totalPages = Math.ceil(total / 10);
-    return { alert, totalPages };
+      },
+      {
+        $unwind: {
+          path: "$product",
+          preserveNullAndEmptyArrays: false, // change to true for non-strict matching
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ["$product", "$$ROOT"],
+          },
+        },
+      },
+      {
+        $project: {
+          product: 0,
+          __v: 0,
+        },
+      },
+      { $skip: (pageNum - 1) * limitNum },
+      { $limit: limitNum },
+    ]);
+    return { data: alerts, totalPages: Math.ceil(totalItems / limitNum) };
   };
+
   findAlert = async (query) => {
     return await alertSchema.findOne(query);
   };
