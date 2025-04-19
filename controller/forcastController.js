@@ -15,31 +15,10 @@ class forecastController {
 
   findAll = async (req, res) => {
     try {
-      // let inventory = await inventoryService.findAll(req.query);
-
-      // const response = await axios.post(
-      //   "http://0.0.0.0:8000/make-forecast",
-      //   inventory.map((item) => {
-      //     return {
-      //       sku: item.sku,
-      //       product_title: item.description,
-      //       category: item.category,
-      //       subcategory: item.subcategory,
-      //       price: item.price,
-      //       material: item.material,
-      //       gender_age: item.gender_age,
-      //       current_inventory: item.stock,
-      //       start_day: Date.now(),
-      //       end_day: Date.now() + 1000 * 60 * 60 * 24 * 90,
-      //     };
-      //   }),
-      //   {
-      //     headers: {
-      //       authorization: "hashbin2",
-      //     },
-      //   }
-      // );
-      // const forcast = await forecastServices.findAll(req.query);
+      const forcast = await forecastServices.findAll({
+        ...req.query,
+        userId: req.userId,
+      });
       if (forcast.length === 0) {
         return Response.notfound(res, messageUtil.NOT_FOUND);
       }
