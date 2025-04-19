@@ -180,7 +180,7 @@ class inventoryController {
         }
       }
 
-      return Response.success(res, messageUtil.OK);
+      return Response.success(res, messageUtil.INVENTORY_UPDATE);
     } catch (error) {
       console.error("Update Inventory Error:", error);
       return Response.serverError(res, error);
