@@ -74,7 +74,17 @@ class alertCRUD {
   // };
 
   findAll = async (query) => {
-    return await alertSchema.find(query);
+    let currentPage = 1;
+    let page = query.page;
+    if (page) {
+      currentPage = page;
+    }
+    let skip = (currentPage - 1) * 10;
+    delete query.page;
+    let alerts = await alertSchema.find(query).skip(skip).limit(10);
+    let total = await alertSchema.countDocuments(query);
+    let totalPages = Math.ceil(total / 10);
+    return { alerts, totalPages };
   };
   findAlert = async (query) => {
     return await alertSchema.findOne(query);

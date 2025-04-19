@@ -22,12 +22,11 @@ class alertController {
         user: req.userId,
         ...req.query,
       });
-      console.log("response", response);
-      // if (response.alert.length === 0) {
-      //   return Response.notfound(res, messageUtil.NOT_FOUND);
-      // }
+      if (response.alerts.length === 0) {
+        return Response.notfound(res, messageUtil.NOT_FOUND);
+      }
 
-      return Response.success(res, response, messageUtil.SUCCESS);
+      return Response.success(res, messageUtil.OK, response);
     } catch (error) {
       Response.serverError(res, error);
     }
