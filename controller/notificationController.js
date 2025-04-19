@@ -25,6 +25,25 @@ class notificationController {
       return Response.serverError(res, error);
     }
   };
+  updateNotification = async (req, res) => {
+    try {
+      const { isread } = req.body;
+      const updated = await notificationService.updateNotification(
+        {
+          _id: req.params.id,
+          userId: req.userId,
+        },
+        { isread }
+      );
+
+      if (!updated) {
+        return Response.notfound(res, messageUtil.NOT_FOUND);
+      }
+      return Response.success(res, messageUtil.OK, updated);
+    } catch (error) {
+      return Response.serverError(res, error);
+    }
+  };
   deleteNotification = async (req, res) => {
     try {
       const deleted = await notificationService.delateNotification({

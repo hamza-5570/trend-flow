@@ -8,6 +8,11 @@ routes.post(
   middleware.authenticateToken,
   notificationController.createNotification
 );
+routes.put(
+  "/update/:id",
+  middleware.authenticateToken,
+  notificationController.updateNotification
+);
 routes.get(
   "/all",
   middleware.authenticateUser,
