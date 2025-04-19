@@ -1,14 +1,20 @@
-import express from 'express';
+import express from "express";
 const routes = express.Router();
-import middleware from '../middleware/auth.js';
-import notificationController from '../controller/notificationController.js';
+import middleware from "../middleware/auth.js";
+import notificationController from "../controller/notificationController.js";
+
+routes.post(
+  "/create",
+  middleware.authenticateToken,
+  notificationController.createNotification
+);
 routes.get(
-  '/all',
+  "/all",
   middleware.authenticateUser,
   notificationController.getUserNotifications
 );
 routes.delete(
-  '/:id',
+  "/:id",
   middleware.authenticateUser,
   notificationController.deleteNotification
 );

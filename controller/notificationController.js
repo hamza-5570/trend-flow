@@ -1,7 +1,19 @@
-import Response from '../utilities/response.js';
-import messageUtil from '../utilities/message.js';
-import notificationService from '../services/notificationService.js';
+import Response from "../utilities/response.js";
+import messageUtil from "../utilities/message.js";
+import notificationService from "../services/notificationService.js";
 class notificationController {
+  createNotification = async (req, res) => {
+    try {
+      const { message } = req.body;
+      const notification = await notificationService.createNotification({
+        message,
+        userId: req.userId,
+      });
+      return Response.success(res, messageUtil.CREATED, notification);
+    } catch (error) {
+      return Response.serverError(res, error);
+    }
+  };
   getUserNotifications = async (req, res) => {
     try {
       const notifications = await notificationService.findAll({
@@ -23,7 +35,7 @@ class notificationController {
       if (!deleted) {
         return Response.notfound(res, messageUtil.NOT_FOUND);
       }
-      return Response.success(res, { message: 'Notification deleted' });
+      return Response.success(res, { message: "Notification deleted" });
     } catch (error) {
       return Response.serverError(res, error);
     }
