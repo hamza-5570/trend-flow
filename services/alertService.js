@@ -1,60 +1,81 @@
 import mongoose from "mongoose";
 import alertSchema from "../model/alert.js";
-
 class alertCRUD {
   createAlert = async (query) => {
     return await alertSchema.create(query);
   };
+  // findAll = async (query) => {
+  //   console.log("query", query);
+  //   const alerts = await alertSchema.aggregate([
+  //     // Match alerts for a specific user
+  //     {
+  //       $match: {
+  //         user: new mongoose.Types.ObjectId(query.user),
+  //       },
+  //     },
+
+  //     // Lookup product information for these alerts (matching both user and SKU)
+  //     {
+  //       $lookup: {
+  //         from: "products",
+  //         let: { alertSku: "$sku", alertUser: "$user" },
+  //         pipeline: [
+  //           {
+  //             $match: {
+  //               $expr: {
+  //                 $and: [
+  //                   { $eq: ["$user", "$$alertUser"] },
+  //                   { $eq: ["$sku", "$$alertSku"] },
+  //                 ],
+  //               },
+  //             },
+  //           },
+  //           // Include only the product fields you want
+  //           {
+  //             $project: {
+  //               name: 1,
+  //               description: 1,
+  //               category: 1,
+  //               subcategory: 1,
+  //               material: 1,
+  //             },
+  //           },
+  //         ],
+  //         as: "product",
+  //       },
+  //     },
+
+  //     // Unwind the product array (since there should be only one product per SKU)
+  //     { $unwind: "$product" },
+
+  //     // Project to shape the final output
+  //     {
+  //       $project: {
+  //         _id: 1,
+  //         sku: 1,
+  //         type: 1,
+  //         createdAt: 1,
+  //         updatedAt: 1,
+  //         // Include only the product fields you need
+  //         product: {
+  //           name: "$product.name",
+  //           description: "$product.description",
+  //           category: "$product.category",
+  //           subcategory: "$product.subcategory",
+  //           material: "$product.material",
+  //         },
+  //       },
+  //     },
+
+  //     // Optional: Sort by alert creation date (newest first)
+  //     { $sort: { createdAt: -1 } },
+  //   ]);
+  //   console.log("alerts:", alerts);
+  // };
+
   findAll = async (query) => {
-    const { page = 1, limit = 10, ...filters } = query;
-
-    // Convert string ID to ObjectId
-    if (filters.user) {
-      filters.user = new mongoose.Types.ObjectId(filters.user);
-    }
-
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
-
-    const totalItems = await alertSchema.countDocuments(filters);
-
-    const alerts = await alertSchema.aggregate([
-      {
-        $match: filters,
-      },
-      {
-        $lookup: {
-          from: "products",
-          localField: "sku",
-          foreignField: "sku",
-          as: "product",
-        },
-      },
-      {
-        $unwind: {
-          path: "$product",
-          preserveNullAndEmptyArrays: false, // change to true for non-strict matching
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: ["$product", "$$ROOT"],
-          },
-        },
-      },
-      {
-        $project: {
-          product: 0,
-          __v: 0,
-        },
-      },
-      { $skip: (pageNum - 1) * limitNum },
-      { $limit: limitNum },
-    ]);
-    return { data: alerts, totalPages: Math.ceil(totalItems / limitNum) };
+    return await alertSchema.find(query);
   };
-
   findAlert = async (query) => {
     return await alertSchema.findOne(query);
   };

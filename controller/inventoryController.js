@@ -1,15 +1,10 @@
 import axios from "axios";
 import Response from "../utilities/response.js";
 import messageUtil from "../utilities/message.js";
-import inventoryServices from "../services/inventoryService.js";
-import Inventory from "../model/inventory.js";
-import notificationService from "../services/notificationService.js";
 import saleService from "../services/saleService.js";
 import productService from "../services/productService.js";
-import csv from "csv-parser";
-import fs from "fs";
 import forcastServices from "../services/forcastServices.js";
-
+import inventoryServices from "../services/inventoryService.js";
 class inventoryController {
   createInventory = async (req, res) => {
     try {
@@ -66,7 +61,7 @@ class inventoryController {
           if (!product) {
             await productService.createProduct({
               sku: item.SKU,
-              userId: req.userId,
+              user: req.userId,
               name: item.Category,
               description: item.ProductTitle,
               category: item.Category,
@@ -151,6 +146,7 @@ class inventoryController {
             }
 
             // Calculate sums
+            const sum7 = sumForecast(7);
             const sum30 = sumForecast(30);
             const sum60 = sumForecast(60);
             const sum90 = sumForecast(90);

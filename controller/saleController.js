@@ -4,6 +4,7 @@ import Response from "../utilities/response.js";
 import messageUtil from "../utilities/message.js";
 import saleService from "../services/saleService.js";
 import productService from "../services/productService.js";
+import forcastServices from "../services/forcastServices.js";
 import notificationService from "../services/notificationService.js";
 import inventoryService from "../services/inventoryService.js";
 import alertService from "../services/alertService.js";
@@ -31,7 +32,7 @@ class saleController {
         if (!product) {
           await notificationService.createNotification({
             message: `Product ${sale.ProductTitle} is not availabe in our database`,
-            userId: req.user._id,
+            userId: req.userId,
           });
         } else {
           await saleService.createSale({
@@ -58,9 +59,20 @@ class saleController {
             }
           );
           if (inventory.stock <= 0) {
+            let product = await productService.findProduct({
+              sku: sale.SKU,
+              userId: req.userId,
+            });
+            let forcast = await forcastServices.findForcast({
+              sku: sale.SKU,
+              userId: req.userId,
+            });
             await alertService.createAlert({
               sku: sale.SKU,
-              user: req.user._id,
+              user: req.userId,
+              description: product.description,
+              quantity: 0,
+              weeklyDemand: forcast.forcast_demand_7,
               alertType: "stockout",
             });
           }
