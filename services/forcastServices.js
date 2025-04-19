@@ -11,6 +11,15 @@ class forcastCRUD {
       currentPage = page;
     }
     let skip = (currentPage - 1) * 10;
+    // give time range
+    if (query.startDate && query.endDate) {
+      query.createdAt = {
+        $gte: new Date(query.startDate),
+        $lte: new Date(query.endDate),
+      };
+      delete query.startDate;
+      delete query.endDate;
+    }
     delete query.page;
     let forcast = await forcastSchema.find(query).skip(skip).limit(10);
     let total = await forcastSchema.countDocuments(query);
