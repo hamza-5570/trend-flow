@@ -1,7 +1,9 @@
 import axios from "axios";
+import response from "../utilities/response.js";
 import Response from "../utilities/response.js";
 import messageUtil from "../utilities/message.js";
 import saleService from "../services/saleService.js";
+import alertService from "../services/alertService.js";
 import productService from "../services/productService.js";
 import forcastServices from "../services/forcastServices.js";
 import inventoryServices from "../services/inventoryService.js";
@@ -156,11 +158,35 @@ class inventoryController {
               userId: req.userId,
               category: item.Category,
               forcast_demand: totalDemand,
+              forcast_demand_7: sum7,
               days_demand_30: sum30,
               days_demand_60: sum60,
               days_demand_90: sum90,
             };
+            if (
+              forecastResponse.data[2] ===
+              "Overstock Warning: Current inventory exceeds forecasted demand."
+            ) {
+              await alertService.createAlert({
+                user: req.userId,
+                sku: item.SKU,
+                description: item.ProductTitle,
+                quantity: item.CurrentInventory,
+                weeklyDemand: sum7,
+                type: "overstock",
+              });
+            }
 
+            if (item.CurrentInventory <= item.ReorderPoint) {
+              await alertService.createAlert({
+                user: req.userId,
+                sku: item.SKU,
+                description: item.ProductTitle,
+                quantity: item.CurrentInventory,
+                weeklyDemand: sum7,
+                type: "reorder",
+              });
+            }
             // 7. Save or Update Forecast
             const existingForecast = await forcastServices.findForcast({
               sku: item.SKU,
