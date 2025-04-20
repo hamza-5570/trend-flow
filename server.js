@@ -13,12 +13,7 @@ app.use(express.json({ urlencoded: true }));
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3001",
-      "https://tren-flow.vercel.app",
-      "https://trend-flow.onrender.com",
-      "https://user-api-cp6n.onrender.com",
-    ],
+    origin: true, // Allow all origins
     credentials: true,
   })
 );
