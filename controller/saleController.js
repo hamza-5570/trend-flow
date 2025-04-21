@@ -47,7 +47,6 @@ class saleController {
             reorderPoint: sale.ReorderPoint,
             priceAtSale: sale.Price,
           });
-          console.log("items", sale);
           let inventory = await inventoryService.updateInventory(
             {
               sku: sale.SKU,
@@ -55,16 +54,14 @@ class saleController {
               color: sale.Color,
             },
             {
-              $inc: { stock: -sale.CurrentInventory },
+              $inc: { stock: -sale.UnitsSold },
             }
           );
-          console.log("update ho gye", inventory);
           if (inventory.stock <= 0) {
             let product = await productService.findProduct({
               sku: sale.SKU,
               user: req.userId,
             });
-            console.log("product", product);
             let forcast = await forcastServices.findForcast({
               sku: sale.SKU,
               userId: req.userId,
