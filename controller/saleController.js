@@ -55,7 +55,7 @@ class saleController {
               reorderPoint: sale.ReorderPoint,
             },
             {
-              stock: sale.CurrentInventory,
+              $inc: { stock: -sale.CurrentInventory },
             }
           );
           if (inventory.stock <= 0) {
