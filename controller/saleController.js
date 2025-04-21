@@ -31,7 +31,7 @@ class saleController {
         let product = await productService.findProduct({ sku: sale.SKU });
         if (!product) {
           await notificationService.createNotification({
-            message: `Product ${sale.ProductTitle} is not availabe in our database`,
+            message: `Product ${sale.SKU} is not availabe in our database`,
             userId: req.userId,
           });
         } else {
