@@ -3,6 +3,11 @@ const saleSchema = new Schema(
   {
     sku: { type: String, required: true },
     id: { type: String, required: true },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     orderId: { type: String, required: true },
     unitsSold: { type: Number, required: true },
     sales: { type: Number, required: true },

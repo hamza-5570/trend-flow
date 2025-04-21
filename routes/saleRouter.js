@@ -5,7 +5,7 @@ import saleController from "../controller/saleController.js";
 import { csvUploadMiddleware } from "../middleware/readCsv.js";
 routes.post(
   "/uploadCsvSales",
-  authToken.authenticateUser,
+  authToken.authenticateToken,
   csvUploadMiddleware,
   saleController.createSaleWithCSV
 );

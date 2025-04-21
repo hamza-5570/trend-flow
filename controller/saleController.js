@@ -37,6 +37,7 @@ class saleController {
         } else {
           await saleService.createSale({
             sku: sale.SKU,
+            userId: req.userId,
             id: sale.Productid,
             orderId: sale.OrderId,
             unitsSold: sale.UnitsSold,
@@ -46,23 +47,24 @@ class saleController {
             reorderPoint: sale.ReorderPoint,
             priceAtSale: sale.Price,
           });
-
+          console.log("items", sale);
           let inventory = await inventoryService.updateInventory(
             {
               sku: sale.SKU,
               size: sale.Size,
               color: sale.Color,
-              reorderPoint: sale.ReorderPoint,
             },
             {
               $inc: { stock: -sale.CurrentInventory },
             }
           );
+          console.log("update ho gye", inventory);
           if (inventory.stock <= 0) {
             let product = await productService.findProduct({
               sku: sale.SKU,
-              userId: req.userId,
+              user: req.userId,
             });
+            console.log("product", product);
             let forcast = await forcastServices.findForcast({
               sku: sale.SKU,
               userId: req.userId,
@@ -72,8 +74,8 @@ class saleController {
               user: req.userId,
               description: product.description,
               quantity: 0,
-              weeklyDemand: forcast.forcast_demand_7,
-              alertType: "stockout",
+              weeklyDemand: forcast?.forcast_demand_7 ?? 0,
+              type: "stockout",
             });
           }
         }

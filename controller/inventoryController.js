@@ -53,12 +53,14 @@ class inventoryController {
         // 1. Check if inventory exists
         let inventory = await inventoryServices.findInventoryId({
           sku: item.SKU,
+          user: req.userId,
         });
 
         if (!inventory) {
           // check product exist
           let product = await productService.findProduct({
             sku: item.SKU,
+            user: req.userId,
           });
           if (!product) {
             await productService.createProduct({
@@ -70,19 +72,19 @@ class inventoryController {
               subcategory: item.Subcategory,
               material: item.Material,
             });
+            inventory = await inventoryServices.createInventory({
+              sku: item.SKU,
+              userId: req.userId,
+              stock: item.CurrentInventory,
+              price: item.Price,
+              stockInDate: Date.now(),
+              size: item.Size,
+              color: item.Color,
+              lead_time: req.body.lead_time,
+              safety_stock: req.body.safety_stock,
+              reorderPoint: item.ReorderPoint,
+            });
           }
-          inventory = await inventoryServices.createInventory({
-            sku: item.SKU,
-            userId: req.userId,
-            stock: item.CurrentInventory,
-            price: item.Price,
-            stockInDate: Date.now(),
-            size: item.Size,
-            color: item.Color,
-            lead_time: req.body.lead_time,
-            safety_stock: req.body.safety_stock,
-            reorderPoint: item.ReorderPoint,
-          });
         } else {
           console.log("inventory mili");
           await inventoryServices.updateInventory(
