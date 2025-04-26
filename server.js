@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
   res.send("Welcome to Ecommerce APIs");
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.use("/", routes);
 app.listen(PORT, () => {
   console.log(`Server in running and listening on ${PORT}`);
