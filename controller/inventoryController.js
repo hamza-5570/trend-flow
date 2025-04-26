@@ -58,8 +58,10 @@ class inventoryController {
         console.log("inventory:", inventory);
         if (!inventory) {
           console.log("inventory nahi mili");
+          console.log("product create kiya item", item);
           const product = await productService.createProduct({
-            sku: item.SKU,
+            // trim sku to remove spaces
+            sku: item?.SKU?.trim?.(),
             user: req.userId,
             name: item.Category,
             description: item.ProductTitle,

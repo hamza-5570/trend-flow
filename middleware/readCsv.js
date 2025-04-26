@@ -7,6 +7,16 @@ import { Readable } from "stream";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// Helper to sanitize BOM from headers
+const sanitizeHeaders = (row) => {
+  const sanitized = {};
+  for (const key in row) {
+    const cleanKey = key.replace(/^\uFEFF/, "").trim(); // Remove BOM and trim
+    sanitized[cleanKey] = row[key];
+  }
+  return sanitized;
+};
+
 // Middleware to parse CSV
 const parseCSV = (req, res, next) => {
   if (!req.file) {
@@ -21,7 +31,7 @@ const parseCSV = (req, res, next) => {
 
   readable
     .pipe(csv())
-    .on("data", (data) => results.push(data))
+    .on("data", (data) => results.push(sanitizeHeaders(data)))
     .on("end", () => {
       req.csvData = results;
       next();
