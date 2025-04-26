@@ -17,9 +17,7 @@ class saleController {
         d.setUTCHours(0, 0, 0, 0); // set to midnight UTC
         return d.toISOString(); // returns format like "2023-09-18T00:00:00.000Z"
       };
-      let uniqueSkus = [];
-
-      console.log(uniqueSkus);
+      let uniqueSkus = new Map();
       const forecastBaseUrl = "https://stock-ml-model.onrender.com";
       const form = new FormData();
 
@@ -40,10 +38,6 @@ class saleController {
       console.log("train ho gaya");
       await Promise.all(
         req.csvData.map(async (sale) => {
-          // store unique sku
-          if (!uniqueSkus.includes(sale.SKU)) {
-            uniqueSkus.push(sale.SKU);
-          }
           let product = await productService.findProduct({
             sku: sale.SKU,
             user: req.userId,
@@ -81,29 +75,31 @@ class saleController {
               }
             );
             console.log("inventory update ki");
-            if (inventory.stock <= 0) {
-              console.log("product find ki");
-              let forcast = await forcastServices.findForcast({
+            // store unique sku and update stocks every sale
+            if (!uniqueSkus.has(sale.SKU)) {
+              uniqueSkus.set(sale.SKU, {
                 sku: sale.SKU,
-                userId: req.userId,
-              });
-              console.log("forcast find ki");
-              await alertService.createAlert({
-                sku: sale.SKU,
-                user: req.userId,
+                stock: inventory.stock - sale.UnitsSold,
                 description: sale.ProductTitle,
-                quantity: 0,
-                weeklyDemand: forcast?.forcast_demand_7 ?? 0,
-                type: "stockout",
+              });
+            } else {
+              let existingStock = uniqueSkus.get(sale.SKU).stock;
+              uniqueSkus.set(sale.SKU, {
+                sku: sale.SKU,
+                stock: existingStock - sale.UnitsSold,
+                description: sale.ProductTitle,
               });
             }
           }
         })
       );
+
+      // create forcast
       await Promise.all(
-        uniqueSkus.map(async (sku) => {
+        Array.from(uniqueSkus.values()).map(async (skuObj) => {
+          console.log("skuObj:", skuObj);
           // 3. Prepare forecast payload
-          let item = await req.csvData.find((item) => item.SKU === sku);
+          let item = await req.csvData.find((item) => item.SKU === skuObj.sku);
           const forecastPayload = {
             sku: item.SKU,
             product_title: item.ProductTitle,
@@ -168,25 +164,55 @@ class saleController {
                 forecastResponse.data[2] === alertMessage
               ) {
                 console.log("overstock warning");
-                await alertService.createAlert({
+                let alert = await alertService.findAlert({
+                  sku: skuObj.sku,
                   user: req.userId,
-                  sku: item.SKU,
-                  description: item.ProductTitle,
-                  quantity: item.CurrentInventory,
-                  weeklyDemand: sum7,
                   type: "overstock",
                 });
+                if (!alert) {
+                  await alertService.createAlert({
+                    user: req.userId,
+                    sku: item.SKU,
+                    description: item.ProductTitle,
+                    quantity: item.CurrentInventory,
+                    weeklyDemand: sum7,
+                    type: "overstock",
+                  });
+                } else {
+                  await alertService.updateAlert(
+                    { sku: skuObj.sku, user: req.userId, type: "overstock" },
+                    {
+                      quantity: item.CurrentInventory,
+                      weeklyDemand: sum7,
+                    }
+                  );
+                }
               }
 
               if (item.CurrentInventory <= item.ReorderPoint) {
-                await alertService.createAlert({
+                let alert = await alertService.findAlert({
+                  sku: skuObj.sku,
                   user: req.userId,
-                  sku: item.SKU,
-                  description: item.ProductTitle,
-                  quantity: item.CurrentInventory,
-                  weeklyDemand: sum7,
                   type: "reorder",
                 });
+                if (!alert) {
+                  await alertService.createAlert({
+                    user: req.userId,
+                    sku: item.SKU,
+                    description: item.ProductTitle,
+                    quantity: item.CurrentInventory,
+                    weeklyDemand: sum7,
+                    type: "reorder",
+                  });
+                } else {
+                  await alertService.updateAlert(
+                    { sku: skuObj.sku, user: req.userId, type: "reorder" },
+                    {
+                      quantity: item.CurrentInventory,
+                      weeklyDemand: sum7,
+                    }
+                  );
+                }
               }
               // 7. Save or Update Forecast
               const existingForecast = await forcastServices.findForcast({
@@ -195,13 +221,66 @@ class saleController {
 
               if (existingForecast) {
                 console.log("existing forecast mili");
-                await forcastServices.updateForcast(
+                let forcast = await forcastServices.updateForcast(
                   { sku: item.SKU, userId: req.userId },
                   forecastPayloadForDB
                 );
+
+                if (skuObj.stock <= 0) {
+                  let alert = await alertService.findAlert({
+                    sku: skuObj.sku,
+                    user: req.userId,
+                    type: "stockout",
+                  });
+                  if (!alert) {
+                    await alertService.createAlert({
+                      sku: skuObj.sku,
+                      user: req.userId,
+                      description: skuObj.description,
+                      quantity: 0,
+                      weeklyDemand: forcast?.forcast_demand_7 ?? 0,
+                      type: "stockout",
+                    });
+                  } else {
+                    await alertService.updateAlert(
+                      { sku: skuObj.sku, user: req.userId, type: "stockout" },
+                      {
+                        quantity: 0,
+                        weeklyDemand: forcast?.forcast_demand_7 ?? 0,
+                      }
+                    );
+                  }
+                }
               } else {
                 console.log("existing forecast nahi mili");
-                await forcastServices.createForcast(forecastPayloadForDB);
+                let forcast = await forcastServices.createForcast(
+                  forecastPayloadForDB
+                );
+                if (skuObj.stock <= 0) {
+                  let alert = await alertService.findAlert({
+                    sku: skuObj.sku,
+                    user: req.userId,
+                    type: "stockout",
+                  });
+                  if (!alert) {
+                    await alertService.createAlert({
+                      sku: skuObj.sku,
+                      user: req.userId,
+                      description: skuObj.description,
+                      quantity: 0,
+                      weeklyDemand: forcast?.forcast_demand_7 ?? 0,
+                      type: "stockout",
+                    });
+                  } else {
+                    await alertService.updateAlert(
+                      { sku: skuObj.sku, user: req.userId, type: "stockout" },
+                      {
+                        quantity: 0,
+                        weeklyDemand: forcast?.forcast_demand_7 ?? 0,
+                      }
+                    );
+                  }
+                }
               }
             })
             .catch((error) => {
