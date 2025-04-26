@@ -171,25 +171,52 @@ class inventoryController {
                   forecastResponse.data[2] === alertMessage
                 ) {
                   console.log("overstock warning");
-                  await alertService.createAlert({
-                    user: req.userId,
+                  let alert = await alertService.findAlert({
                     sku: item.SKU,
-                    description: item.ProductTitle,
-                    quantity: item.CurrentInventory,
-                    weeklyDemand: sum7,
+                    user: req.userId,
                     type: "overstock",
                   });
+
+                  if (!alert) {
+                    await alertService.createAlert({
+                      user: req.userId,
+                      sku: item.SKU,
+                      description: item.ProductTitle,
+                      quantity: item.CurrentInventory,
+                      weeklyDemand: sum7,
+                      type: "overstock",
+                    });
+                  }
+                } else {
+                  await alertService.updateAlert(
+                    { sku: item.SKU, user: req.userId, type: "overstock" },
+                    { quantity: item.CurrentInventory, weeklyDemand: sum7 }
+                  );
                 }
 
                 if (item.CurrentInventory <= item.ReorderPoint) {
-                  await alertService.createAlert({
-                    user: req.userId,
+                  console.log("reorder warning");
+                  let alert = await alertService.findAlert({
                     sku: item.SKU,
-                    description: item.ProductTitle,
-                    quantity: item.CurrentInventory,
-                    weeklyDemand: sum7,
+                    user: req.userId,
                     type: "reorder",
                   });
+
+                  if (!alert) {
+                    await alertService.createAlert({
+                      user: req.userId,
+                      sku: item.SKU,
+                      description: item.ProductTitle,
+                      quantity: item.CurrentInventory,
+                      weeklyDemand: sum7,
+                      type: "reorder",
+                    });
+                  } else {
+                    await alertService.updateAlert(
+                      { sku: item.SKU, user: req.userId, type: "reorder" },
+                      { quantity: item.CurrentInventory, weeklyDemand: sum7 }
+                    );
+                  }
                 }
                 // 7. Save or Update Forecast
                 const existingForecast = await forcastServices.findForcast({
