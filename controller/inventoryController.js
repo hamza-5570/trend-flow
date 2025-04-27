@@ -157,7 +157,7 @@ class inventoryController {
                 const forecastPayloadForDB = {
                   sku: item.SKU,
                   userId: req.userId,
-                  category: item.Category,
+                  category: item.product_title,
                   forcast_demand: sum90,
                   forcast_demand_7: sum7,
                   days_demand_30: sum30,
