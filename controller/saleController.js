@@ -25,15 +25,15 @@ class saleController {
         contentType: req.file.mimetype,
       });
 
-      const response = await axios.post(
-        `${forecastBaseUrl}/upload-train-data/`,
-        form,
-        {
+      await axios
+        .post(`${forecastBaseUrl}/upload-train-data/`, form, {
           headers: {
             authorization: "hashbin2",
           },
-        }
-      );
+        })
+        .catch((error) => {
+          return Response.serverError(res, error);
+        });
       console.log("train ho gaya");
       await Promise.all(
         req.csvData.map(async (sale) => {
@@ -288,7 +288,7 @@ class saleController {
             });
         })
       );
-      Response.success(res, response.data.message);
+      Response.success(res, "Train data uploaded successfully");
     } catch (error) {
       console.log(error);
       // return the response of server error
