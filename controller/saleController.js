@@ -26,7 +26,7 @@ class saleController {
       });
 
       const response = await axios.post(
-        `${forecastBaseUrl}/upload-train-data`,
+        `${forecastBaseUrl}/upload-train-data/`,
         form,
         {
           headers: {
@@ -119,7 +119,7 @@ class saleController {
           // 4. Send to Forecast API
 
           await axios
-            .post(`${forecastBaseUrl}/make-forecast`, forecastPayload, {
+            .post(`${forecastBaseUrl}/make-forecast/`, forecastPayload, {
               headers: {
                 authorization: "hashbin2",
               },
