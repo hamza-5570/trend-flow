@@ -3,12 +3,11 @@ import FormData from "form-data";
 import Response from "../utilities/response.js";
 import messageUtil from "../utilities/message.js";
 import saleService from "../services/saleService.js";
+import alertService from "../services/alertService.js";
 import productService from "../services/productService.js";
 import forcastServices from "../services/forcastServices.js";
-import notificationService from "../services/notificationService.js";
 import inventoryService from "../services/inventoryService.js";
-import alertService from "../services/alertService.js";
-import forcast from "../model/forcast.js";
+import notificationService from "../services/notificationService.js";
 class saleController {
   createSaleWithCSV = async (req, res) => {
     try {
