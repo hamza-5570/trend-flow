@@ -288,7 +288,7 @@ class saleController {
             });
         })
       );
-      Response.success(res, "Train data uploaded successfully");
+      Response.success(res, "Sales data uploaded successfully");
     } catch (error) {
       console.log(error);
       // return the response of server error
