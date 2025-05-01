@@ -92,7 +92,6 @@ class saleController {
           }
         })
       );
-
       // create forcast
       await Promise.all(
         Array.from(uniqueSkus.values()).map(async (skuObj) => {
@@ -149,7 +148,7 @@ class saleController {
               const forecastPayloadForDB = {
                 sku: item.SKU,
                 userId: req.userId,
-                category: item.product_title,
+                category: item.ProductTitle,
                 forcast_demand: sum90,
                 forcast_demand_7: sum7,
                 days_demand_30: sum30,
@@ -215,11 +214,11 @@ class saleController {
               }
               // 7. Save or Update Forecast
               const existingForecast = await forcastServices.findForcast({
-                sku: item.SKU,
+                sku: skuObj.SKU,
+                userId: req.userId,
               });
 
               if (existingForecast) {
-                console.log("existing forecast mili");
                 let forcast = await forcastServices.updateForcast(
                   { sku: item.SKU, userId: req.userId },
                   forecastPayloadForDB
@@ -252,6 +251,7 @@ class saleController {
                 }
               } else {
                 console.log("existing forecast nahi mili");
+
                 let forcast = await forcastServices.createForcast(
                   forecastPayloadForDB
                 );
