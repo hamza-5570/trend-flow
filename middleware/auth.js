@@ -1,49 +1,29 @@
-import jwt from '../utilities/jwt.js';
-import Response from '../utilities/response.js';
+"use strict";
+import jwtHelper from "../utilities/jwt.js";
 
-const authenticateToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1]; // Extract Bearer token
+let checkToken = (req, res, next) => {
+  let token = req.header("x-auth-token"); // in header token will be send in "x-auth-token" variable
+  if (token) {
+    const isVerified = jwtHelper.verify(token);
 
-  if (!token) {
-    return res.status(401).json({ error: 'Access Denied: No Token Provided' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    req.userId = decoded._id; // Attach user ID to the request
-    next();
-  } catch (error) {
-    return res.status(403).json({ error: 'Invalid Token' });
-  }
-};
-const isAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return Response.authorizationError(res, 'Access denied. Admins only.');
-  }
-  next();
-};
-const authenticateUser = (req, res, next) => {
-  const token = req.header('Authorization');
-
-  if (!token) {
-    return res
-      .status(401)
-      .json({ message: 'Access Denied. No Token Provided.' });
-  }
-
-  try {
-    const decoded = jwt.verify(
-      token.replace('Bearer ', ''),
-      process.env.JWT_SECRET
-    );
-    req.user = decoded; // Attach user data to request
-    next();
-  } catch (error) {
-    res.status(400).json({ message: 'Invalid Token' });
+    if (isVerified) {
+      req.userId = isVerified._id;
+      next();
+    } else {
+      return res.status(401).json({
+        success: "false",
+        message: "Token is not valid",
+      });
+    }
+  } else {
+    return res.status(401).json({
+      success: "false",
+      message: "Token is not provided",
+      missingParameters: ["login_token"],
+    });
   }
 };
+
 export default {
-  authenticateToken,
-  authenticateUser,
-  isAdmin,
+  checkToken: checkToken,
 };

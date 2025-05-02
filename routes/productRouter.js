@@ -2,7 +2,7 @@ import express from "express";
 const routes = express.Router();
 import multer from "multer";
 import productController from "../controller/productcontroller.js";
-import authmiddleware from "../middleware/auth.js";
+import checkToken from "../middleware/auth.js";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -15,11 +15,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 routes.post("/upload", upload.single("csvFile"), productController.newProduct);
-routes.post(
-  "/create",
-  authmiddleware.authenticateToken,
-  productController.createProduct
-);
+routes.post("/create", checkToken.checkToken, productController.createProduct);
 routes.get("/top", productController.SalesSkus);
 routes.get("/", productController.getAllProduct);
 routes.get("/:productId", productController.getByID);
@@ -28,7 +24,7 @@ routes.delete("/:productId", productController.productDelete);
 routes.get("/user-products/:userId", productController.getUserProducts);
 routes.get(
   "/userproducts/:userId",
-  authmiddleware.authenticateUser,
+  checkToken.checkToken,
   productController.getUserProducts
 );
 

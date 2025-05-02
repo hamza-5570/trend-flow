@@ -1,26 +1,26 @@
 import express from "express";
 const routes = express.Router();
-import middleware from "../middleware/auth.js";
+import checkToken from "../middleware/auth.js";
 import notificationController from "../controller/notificationController.js";
 
 routes.post(
   "/create",
-  middleware.authenticateToken,
+  checkToken.checkToken,
   notificationController.createNotification
 );
 routes.put(
   "/update/:id",
-  middleware.authenticateToken,
+  checkToken.checkToken,
   notificationController.updateNotification
 );
 routes.get(
   "/all",
-  middleware.authenticateUser,
+  checkToken.checkToken,
   notificationController.getUserNotifications
 );
 routes.delete(
   "/:id",
-  middleware.authenticateUser,
+  checkToken.checkToken,
   notificationController.deleteNotification
 );
 export default routes;

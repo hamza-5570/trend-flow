@@ -9,6 +9,7 @@ const forecastSchema = new Schema(
       required: true,
     },
     category: { type: String, required: true },
+    description: { type: String, required: true },
     forcast_demand: { type: Number, required: true },
     forcast_demand_7: { type: Number, required: true },
     days_demand_30: { type: Number, required: true },

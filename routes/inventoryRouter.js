@@ -3,11 +3,11 @@ const routes = express.Router();
 import inventoryController from "../controller/inventoryController.js";
 // import inventoryValid from "../validation/inventoryValid.js";
 import { csvUploadMiddleware } from "../middleware/readCsv.js";
-import middleware from "../middleware/auth.js";
+import checkToken from "../middleware/auth.js";
 
 routes.post(
   "/create",
-  middleware.authenticateToken,
+  checkToken.checkToken,
   //   inventoryValid.createInventory,
   inventoryController.createInventory
 );
@@ -16,7 +16,7 @@ routes.get("/find", inventoryController.findInventoryId);
 routes.delete("/:inventoryId", inventoryController.deleteInventory);
 routes.post(
   "/uploadInventory",
-  middleware.authenticateToken,
+  checkToken.checkToken,
   csvUploadMiddleware,
   inventoryController.uploadInventory
 );

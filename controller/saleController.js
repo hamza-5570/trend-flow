@@ -148,7 +148,8 @@ class saleController {
               const forecastPayloadForDB = {
                 sku: item.SKU,
                 userId: req.userId,
-                category: item.ProductTitle,
+                category: item.Category,
+                description: item.ProductTitle,
                 forcast_demand: sum90,
                 forcast_demand_7: sum7,
                 days_demand_30: sum30,
