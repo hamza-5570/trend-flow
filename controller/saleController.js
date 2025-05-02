@@ -214,11 +214,12 @@ class saleController {
               }
               // 7. Save or Update Forecast
               const existingForecast = await forcastServices.findForcast({
-                sku: skuObj.SKU,
+                sku: skuObj.sku,
                 userId: req.userId,
               });
 
               if (existingForecast) {
+                console.log("existing forecast mili");
                 let forcast = await forcastServices.updateForcast(
                   { sku: item.SKU, userId: req.userId },
                   forecastPayloadForDB
