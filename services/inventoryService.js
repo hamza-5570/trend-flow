@@ -38,12 +38,7 @@ class inventoryCRUD {
     return inventory;
   };
   findInventory = async (query) => {
-    return await inventorySchema.findOne(query).populate({
-      path: "product",
-      match: {
-        type: "sku",
-      },
-    });
+    return await inventorySchema.findOne(query);
   };
   findInventoryId = async (query) => {
     return await inventorySchema.findOne(query);

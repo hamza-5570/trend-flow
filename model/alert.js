@@ -23,6 +23,10 @@ const alertSchema = new Schema(
       type: Number,
       default: 0,
     },
+    stockOutDate: {
+      type: Date,
+      default: null,
+    },
     type: {
       type: String,
       enum: ["stockout", "overstock", "reorder"],

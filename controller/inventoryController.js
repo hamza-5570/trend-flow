@@ -45,7 +45,7 @@ class inventoryController {
       });
 
       const uniqueItems = Array.from(uniqueDataMap.values());
-
+      console.log("Unique Items:", uniqueItems);
       // 2. Limit concurrency (e.g., 5 at a time)
       const limit = plimit(5);
 
