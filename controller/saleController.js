@@ -94,8 +94,8 @@ class saleController {
             material: item.Material,
             gender_age: item.Gender_Age,
             current_inventory: parseInt(item.CurrentInventory),
-            lead_time: 1,
-            safety_stock: 10,
+            lead_time: inventory.lead_time,
+            safety_stock: inventory.safety_stock,
             start_day: formatDateToMidnightISOString(Date.now()),
             end_day: formatDateToMidnightISOString(
               Date.now() + 1000 * 60 * 60 * 24 * 90
