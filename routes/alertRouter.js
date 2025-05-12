@@ -7,5 +7,9 @@ routes.post("/create", alertController.createAlert);
 routes.get("/find", alertController.findAlert);
 routes.get("/all", checkToken.checkToken, alertController.findAll);
 routes.patch("/:alertId", alertController.updateAlert);
-routes.delete("/:alertId", alertController.deleteAlert);
+routes.delete(
+  "/delete/:sku/:type",
+  checkToken.checkToken,
+  alertController.deleteAlert
+);
 export default routes;

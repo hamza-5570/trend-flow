@@ -55,7 +55,14 @@ class alertController {
 
   deleteAlert = async (req, res) => {
     try {
-      const response = await alertServices.deleteAlert(req.params.alertId);
+      const response = await alertServices.deleteAlert({
+        sku: req.params.sku,
+        user: req.userId,
+        type: req.params.type,
+      });
+      if (!response) {
+        return Response.notfound(res, messageUtil.NOT_FOUND);
+      }
       Response.success(res, response, messageUtil.SUCCESS);
     } catch (error) {
       Response.serverError(res, error);
