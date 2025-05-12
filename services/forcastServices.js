@@ -20,6 +20,12 @@ class forcastCRUD {
       delete query.startDate;
       delete query.endDate;
     }
+    if (query.description) {
+      query.description = {
+        $regex: query.description,
+        $options: "i",
+      };
+    }
     delete query.page;
     let forcast = await forcastSchema.find(query).skip(skip).limit(10);
     let total = await forcastSchema.countDocuments(query);
