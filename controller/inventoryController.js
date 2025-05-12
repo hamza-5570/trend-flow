@@ -15,10 +15,17 @@ class inventoryController {
 
   findAll = async (req, res) => {
     try {
-      const response = await inventoryServices.findAll(req.query);
+      console.log("Query Params:", req.userId);
+      const response = await inventoryServices.findAll({
+        ...req.query,
+        userId: req.userId,
+      });
+      if (response.inventory.length === 0) {
+        return Response.notfound(res, messageUtil.NOT_FOUND);
+      }
       Response.success(res, response, messageUtil.SUCCESS);
     } catch (error) {
-      Response.error(res, error);
+      Response.serverError(res, error);
     }
   };
 

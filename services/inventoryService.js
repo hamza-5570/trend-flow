@@ -5,37 +5,18 @@ class inventoryCRUD {
     return await inventorySchema.create(query);
   };
   findAll = async (query) => {
-    const inventory = await inventorySchema.aggregate([
-      {
-        $lookup: {
-          from: "products",
-          localField: "sku",
-          foreignField: "sku",
-          as: "product",
-        },
-      },
-      {
-        $unwind: "$product",
-      },
-      {
-        $match: query,
-      },
-      {
-        $replaceRoot: {
-          newRoot: {
-            $mergeObjects: ["$product", "$$ROOT"],
-          },
-        },
-      },
-      {
-        $project: {
-          product: 0, // remove the original product field if it still exists
-          __v: 0, // optional: remove mongoose versioning fields
-        },
-      },
-    ]);
-
-    return inventory;
+    console.log("query", query);
+    let currentPage = 1;
+    let page = query.page;
+    if (page) {
+      currentPage = page;
+    }
+    let skip = (currentPage - 1) * 10;
+    delete query.page;
+    let inventory = await inventorySchema.find(query).skip(skip).limit(10);
+    let total = await inventorySchema.countDocuments(query);
+    let totalPages = Math.ceil(total / 10);
+    return { inventory, totalPages };
   };
   findInventory = async (query) => {
     return await inventorySchema.findOne(query);

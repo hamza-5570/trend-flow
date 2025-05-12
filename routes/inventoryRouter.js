@@ -11,7 +11,7 @@ routes.post(
   //   inventoryValid.createInventory,
   inventoryController.createInventory
 );
-routes.get("/all", inventoryController.findAll);
+routes.get("/all", checkToken.checkToken, inventoryController.findAll);
 routes.get("/find", inventoryController.findInventoryId);
 routes.delete("/:inventoryId", inventoryController.deleteInventory);
 routes.post(
