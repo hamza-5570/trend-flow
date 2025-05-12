@@ -17,8 +17,8 @@ class forcastCRUD {
         $gte: new Date(query.from),
         $lte: new Date(query.to),
       };
-      delete query.startDate;
-      delete query.endDate;
+      delete query.from;
+      delete query.to;
     }
     if (query.description) {
       query.description = {
