@@ -12,10 +12,10 @@ class forcastCRUD {
     }
     let skip = (currentPage - 1) * 10;
     // give time range
-    if (query.startDate && query.endDate) {
+    if (query.from && query.to) {
       query.createdAt = {
-        $gte: new Date(query.startDate),
-        $lte: new Date(query.endDate),
+        $gte: new Date(query.from),
+        $lte: new Date(query.to),
       };
       delete query.startDate;
       delete query.endDate;
