@@ -53,9 +53,13 @@ class forecastController {
 
   deleteForecast = async (req, res) => {
     try {
-      const response = await forecastServices.deleteForecast(
-        req.params.forecastId
-      );
+      const response = await forecastServices.deleteForcast({
+        sku: req.params.sku,
+        userId: req.userId,
+      });
+      if (!response) {
+        return Response.notfound(res, messageUtil.NOT_FOUND);
+      }
       Response.success(res, messageUtil.SUCCESS, response);
     } catch (error) {
       Response.serverError(res, error);

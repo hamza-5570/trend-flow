@@ -5,5 +5,10 @@ import forcastController from "../controller/forcastController.js";
 
 routes.post("/create", forcastController.createForecast);
 routes.get("/all", checkToken.checkToken, forcastController.findAll);
+routes.delete(
+  "/delete/:sku",
+  checkToken.checkToken,
+  forcastController.deleteForecast
+);
 
 export default routes;
