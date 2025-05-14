@@ -42,6 +42,14 @@ class inventoryController {
 
   uploadInventory = async (req, res) => {
     try {
+      // update all inventories with lead time and safety stock
+      await inventoryServices.updateMany({
+        lead_time: req.body.lead_time,
+        safety_stock: req.body.safety_stock,
+      });
+      if (!req.csvData) {
+        return Response.success(res, messageUtil.INVENTORY_UPDATE);
+      }
       // 1. Deduplicate by SKU
       const uniqueDataMap = new Map();
       req.csvData.forEach((item) => {

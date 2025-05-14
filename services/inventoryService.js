@@ -33,5 +33,9 @@ class inventoryCRUD {
   filterFind = async (query) => {
     return await inventorySchema.findOne(query).populate("product", "name sku");
   };
+
+  updateMany = async (data) => {
+    return await inventorySchema.updateMany({}, data);
+  };
 }
 export default new inventoryCRUD();

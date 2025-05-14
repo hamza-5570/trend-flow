@@ -20,26 +20,27 @@ const sanitizeHeaders = (row) => {
 // Middleware to parse CSV
 const parseCSV = (req, res, next) => {
   if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
+    console.log("ider aya");
+    next();
+  } else {
+    const results = [];
+    const readable = new Readable();
+    readable._read = () => {};
+    readable.push(req.file.buffer);
+    readable.push(null);
+
+    readable
+      .pipe(csv())
+      .on("data", (data) => results.push(sanitizeHeaders(data)))
+      .on("end", () => {
+        req.csvData = results;
+        next();
+      })
+      .on("error", (err) => {
+        console.error("CSV Parse Error:", err);
+        res.status(500).json({ error: "Error parsing CSV file" });
+      });
   }
-
-  const results = [];
-  const readable = new Readable();
-  readable._read = () => {};
-  readable.push(req.file.buffer);
-  readable.push(null);
-
-  readable
-    .pipe(csv())
-    .on("data", (data) => results.push(sanitizeHeaders(data)))
-    .on("end", () => {
-      req.csvData = results;
-      next();
-    })
-    .on("error", (err) => {
-      console.error("CSV Parse Error:", err);
-      res.status(500).json({ error: "Error parsing CSV file" });
-    });
 };
 
 export const csvUploadMiddleware = [upload.single("file"), parseCSV];
