@@ -11,7 +11,7 @@ routes.post(
 );
 routes.get(
   "/top-selling-products",
-  // authToken.authenticateUser,
+  checkToken.checkToken,
   saleController.TopSku
 );
 export default routes;

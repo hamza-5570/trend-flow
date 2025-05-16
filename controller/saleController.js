@@ -298,7 +298,10 @@ class saleController {
 
   TopSku = async (req, res) => {
     try {
-      const response = await saleService.topSellingProducts();
+      console.log("top sku");
+      const response = await saleService.topSellingProducts({
+        userId: req.userId,
+      });
 
       if (!response) {
         return Response.notfound(res, messageUtil.NOT_FOUND);

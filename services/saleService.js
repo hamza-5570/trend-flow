@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Sale from "../model/sale.js";
 class saleCRUD {
   createSale = async (query) => {
@@ -57,15 +58,17 @@ class saleCRUD {
     ]);
   };
 
-  topSellingProducts = async () => {
+  topSellingProducts = async (query) => {
     try {
+      console.log("Query in topSellingProducts:", query.userId);
       const topSellingSKUs = await Sale.aggregate([
         // Optional: Date filter
-        // {
-        //   $match: {
-        //     saleDate: { $gte: new Date("2024-01-01"), $lte: new Date("2024-12-31") }
-        //   }
-        // },
+        {
+          $match: {
+            // saleDate: { $gte: new Date("2024-01-01"), $lte: new Date("2024-12-31") }
+            userId: new mongoose.Types.ObjectId(query.userId),
+          },
+        },
 
         // Step 1: Group by SKU
         {
