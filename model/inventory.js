@@ -39,6 +39,10 @@ const inventorySchema = new Schema(
     gender_age: {
       type: String,
     },
+    material: {
+      type: String,
+      required: true,
+    },
     lead_time: {
       type: Number,
       default: 7,

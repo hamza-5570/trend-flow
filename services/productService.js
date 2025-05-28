@@ -4,7 +4,7 @@ class productCRUD {
     return await Product.create(query);
   };
   findAll = async (query) => {
-    return await Product.find(query).populate("userId category", "name email");
+    return await Product.find(query).populate("user category", "name email");
   };
   findProduct = async (query) => {
     return await Product.findOne(query);

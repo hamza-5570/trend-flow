@@ -1,7 +1,10 @@
+import axios from "axios";
 import plimit from "p-limit";
 import Response from "../utilities/response.js";
 import messageUtil from "../utilities/message.js";
+import alertService from "../services/alertService.js";
 import productService from "../services/productService.js";
+import forcastServices from "../services/forcastServices.js";
 import inventoryServices from "../services/inventoryService.js";
 class inventoryController {
   createInventory = async (req, res) => {
@@ -42,6 +45,12 @@ class inventoryController {
 
   uploadInventory = async (req, res) => {
     try {
+      const formatDateToMidnightISOString = (date) => {
+        const d = new Date(date);
+        d.setUTCHours(0, 0, 0, 0); // set to midnight UTC
+        return d.toISOString(); // returns format like "2023-09-18T00:00:00.000Z"
+      };
+      const forecastBaseUrl = "https://stock-ml-model.onrender.com";
       // update all inventories with lead time and safety stock
       let inventory = await inventoryServices.updateMany({
         lead_time: req.body.lead_time,
@@ -94,6 +103,8 @@ class inventoryController {
                 lead_time: req.body.lead_time,
                 safety_stock: req.body.safety_stock,
                 reorderPoint: item.ReorderPoint,
+                gender_age: item.Gender_Age,
+                material: item.Material,
               });
             } else {
               await inventoryServices.updateInventory(
@@ -107,6 +118,8 @@ class inventoryController {
                   lead_time: req.body.lead_time,
                   safety_stock: req.body.safety_stock,
                   reorderPoint: item.ReorderPoint,
+                  gender_age: item.Gender_Age,
+                  material: item.Material,
                 }
               );
             }
@@ -144,6 +157,7 @@ class inventoryController {
               Date.now() + 1000 * 60 * 60 * 24 * 90
             ), // 90 days later
           };
+          console.log("Forecast Payload:", forecastPayload);
           // console.log("Forecast Payload:", forecastPayload);
           // 4. Send to Forecast API
 
