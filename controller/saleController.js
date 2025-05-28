@@ -316,12 +316,12 @@ class saleController {
     try {
       const response = await saleService.deleteManySales({
         userId: req.userId,
-        ...req.query,
+        sku: { $in: req.body.skus },
       });
       if (!response) {
         return Response.notfound(res, messageUtil.NOT_FOUND);
       }
-      Response.success(res, messageUtil.SUCCESS);
+      Response.success(res, messageUtil.SUCCESS, response);
     } catch (error) {
       Response.serverError(res, error);
     }

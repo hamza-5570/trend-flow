@@ -15,5 +15,9 @@ routes.get(
   saleController.TopSku
 );
 
-routes.delete("/delete", checkToken.checkToken, saleController.DeleteAllSale);
+routes.delete(
+  "/allDelete",
+  checkToken.checkToken,
+  saleController.DeleteAllSale
+);
 export default routes;
