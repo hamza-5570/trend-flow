@@ -110,6 +110,10 @@ class alertCRUD {
       data: data.slice(startIndex, endIndex),
     };
   };
+
+  deleteAllAlerts = async (query) => {
+    return await alertSchema.deleteMany(query);
+  };
 }
 
 export default new alertCRUD();

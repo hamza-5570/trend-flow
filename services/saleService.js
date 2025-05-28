@@ -140,5 +140,9 @@ class saleCRUD {
       return [];
     }
   };
+  // delete many sales
+  deleteManySales = async (query) => {
+    return await Sale.deleteMany(query);
+  };
 }
 export default new saleCRUD();

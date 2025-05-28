@@ -68,6 +68,24 @@ class alertController {
       Response.serverError(res, error);
     }
   };
+
+  // delete all alerts with ids and type and userId
+
+  deleteAllAlerts = async (req, res) => {
+    try {
+      const response = await alertServices.deleteAllAlerts({
+        _id: { $in: req.body.ids },
+        user: req.userId,
+        type: req.body.type,
+      });
+      if (!response) {
+        return Response.notfound(res, messageUtil.NOT_FOUND);
+      }
+      Response.success(res, response, messageUtil.SUCCESS);
+    } catch (error) {
+      Response.serverError(res, error);
+    }
+  };
 }
 
 export default new alertController();

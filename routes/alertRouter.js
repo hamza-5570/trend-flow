@@ -12,4 +12,9 @@ routes.delete(
   checkToken.checkToken,
   alertController.deleteAlert
 );
+routes.delete(
+  "/allDelete",
+  checkToken.checkToken,
+  alertController.deleteAllAlerts
+);
 export default routes;

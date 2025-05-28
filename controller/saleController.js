@@ -311,6 +311,21 @@ class saleController {
       Response.serverError(res, error);
     }
   };
+
+  DeleteAllSale = async (req, res) => {
+    try {
+      const response = await saleService.deleteManySales({
+        userId: req.userId,
+        ...req.query,
+      });
+      if (!response) {
+        return Response.notfound(res, messageUtil.NOT_FOUND);
+      }
+      Response.success(res, messageUtil.SUCCESS);
+    } catch (error) {
+      Response.serverError(res, error);
+    }
+  };
 }
 
 export default new saleController();
