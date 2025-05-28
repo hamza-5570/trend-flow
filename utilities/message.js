@@ -64,6 +64,7 @@ const messageUtil = {
   STOCK_OUT: "Out of Stock",
   OVER_STOCK: "Over the Stock",
   INVENTORY_UPDATE: "Inventory Updated Successfully",
+  INVENTORY_NOT_FOUND: "please enter inventory first",
 
   // payment messages
   USER_STRING_BASE: "User should be a type of text",
