@@ -41,5 +41,9 @@ class forcastCRUD {
   deleteForcast = async (query) => {
     return await forcastSchema.findOneAndDelete(query);
   };
+  deleteAllForcasts = async (query) => {
+    console.log("query", query);
+    return await forcastSchema.deleteMany(query);
+  };
 }
 export default new forcastCRUD();

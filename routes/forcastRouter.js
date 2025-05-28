@@ -10,5 +10,9 @@ routes.delete(
   checkToken.checkToken,
   forcastController.deleteForecast
 );
-
+routes.delete(
+  "/allDelete",
+  checkToken.checkToken,
+  forcastController.deleteAllForecasts
+);
 export default routes;

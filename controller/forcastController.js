@@ -65,6 +65,21 @@ class forecastController {
       Response.serverError(res, error);
     }
   };
+
+  deleteAllForecasts = async (req, res) => {
+    try {
+      const response = await forecastServices.deleteAllForcasts({
+        userId: req.userId,
+        _id: { $in: req.body.ids },
+      });
+      if (!response) {
+        return Response.notfound(res, messageUtil.NOT_FOUND);
+      }
+      Response.success(res, messageUtil.SUCCESS, response);
+    } catch (error) {
+      Response.serverError(res, error);
+    }
+  };
 }
 
 export default new forecastController();
