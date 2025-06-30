@@ -56,25 +56,26 @@ class inventoryController {
         lead_time: req.body.lead_time,
         safety_stock: req.body.safety_stock,
       });
+      console.log(req.csvData);
       if (!inventory) {
         return Response.badRequest(res, messageUtil.INVENTORY_NOT_FOUND);
       }
       if (req.csvData) {
         // 1. Deduplicate by SKU
-        const uniqueDataMap = new Map();
-        req.csvData.forEach((item) => {
-          const trimmedSku = item?.SKU?.trim?.();
-          if (!uniqueDataMap.has(trimmedSku)) {
-            uniqueDataMap.set(trimmedSku, item);
-          }
-        });
-        const uniqueItems = Array.from(uniqueDataMap.values());
-        console.log("Unique Items:", uniqueItems);
+        // const uniqueDataMap = new Map();
+        // req.csvData.forEach((item) => {
+        //   const trimmedSku = item?.SKU?.trim?.();
+        //   if (!uniqueDataMap.has(trimmedSku)) {
+        //     uniqueDataMap.set(trimmedSku, item);
+        //   }
+        // });
+        // const uniqueItems = Array.from(uniqueDataMap.values());
+        // console.log("Unique Items:", uniqueItems);
         // 2. Limit concurrency (e.g., 5 at a time)
         const limit = plimit(5);
 
         // 3. Process with controlled concurrency
-        const promises = uniqueItems.map((item) =>
+        const promises = req.csvData.map((item) =>
           limit(async () => {
             let inventory = await inventoryServices.findInventoryId({
               sku: item.SKU,
@@ -95,14 +96,14 @@ class inventoryController {
               inventory = await inventoryServices.createInventory({
                 sku: item.SKU,
                 userId: req.userId,
-                stock: item.CurrentInventory,
+                stock: item.Inventory_Total,
                 price: item.Price,
                 stockInDate: Date.now(),
                 size: item.Size,
                 color: item.Color,
                 lead_time: req.body.lead_time,
                 safety_stock: req.body.safety_stock,
-                reorderPoint: item.ReorderPoint,
+                // reorderPoint: item.ReorderPoint,
                 gender_age: item.Gender_Age,
                 material: item.Material,
               });
@@ -110,14 +111,14 @@ class inventoryController {
               await inventoryServices.updateInventory(
                 { sku: item.SKU, userId: req.userId },
                 {
-                  stock: item.CurrentInventory,
+                  stock: item.Inventory_Total,
                   stockInDate: Date.now(),
                   size: item.Size,
                   color: item.Color,
                   price: item.Price,
                   lead_time: req.body.lead_time,
                   safety_stock: req.body.safety_stock,
-                  reorderPoint: item.ReorderPoint,
+                  // reorderPoint: item.ReorderPoint,
                   gender_age: item.Gender_Age,
                   material: item.Material,
                 }
@@ -128,30 +129,28 @@ class inventoryController {
 
         await Promise.all(promises);
       }
-      let uniqueSkus = await productService.findAll({
-        user: req.userId,
-      });
+
       await Promise.all(
         // find all products with unique SKUs
-        uniqueSkus.map(async (skuObj) => {
+        req.csvData.map(async (skuObj) => {
           console.log("skuObj:", skuObj);
           // find inventory
-          let inventory = await inventoryServices.findInventory({
-            sku: skuObj.sku,
-            userId: req.userId,
-          });
+          // let inventory = await inventoryServices.findInventory({
+          //   sku: skuObj.SKU,
+          //   userId: req.userId,
+          // });
 
           const forecastPayload = {
-            sku: inventory.sku,
-            product_title: skuObj.description,
-            category: skuObj.category,
-            subcategory: skuObj.subcategory,
-            price: inventory.price,
-            material: inventory.material,
-            gender_age: inventory.gender_age,
-            current_inventory: inventory.stock,
-            lead_time: inventory.lead_time,
-            safety_stock: inventory.safety_stock,
+            sku: skuObj.SKU,
+            product_title: skuObj.ProductTitle,
+            category: skuObj.Category,
+            subcategory: skuObj.Subcategory,
+            price: skuObj.Price,
+            material: skuObj.Material,
+            gender_age: skuObj.Gender_Age,
+            current_inventory: skuObj.Inventory_Total,
+            lead_time: req.body.lead_time,
+            safety_stock: req.body.safety_stock,
             start_day: formatDateToMidnightISOString(Date.now()),
             end_day: formatDateToMidnightISOString(
               Date.now() + 1000 * 60 * 60 * 24 * 90
@@ -195,10 +194,10 @@ class inventoryController {
               const sum90 = sumForecast(90);
               // 6. Prepare forecast payload for DB
               const forecastPayloadForDB = {
-                sku: skuObj.sku,
+                sku: skuObj.SKU,
                 userId: req.userId,
-                category: skuObj.category,
-                description: skuObj.description,
+                category: skuObj.Category,
+                description: skuObj.ProductTitle,
                 forcast_demand: sum90,
                 forcast_demand_7: sum7,
                 days_demand_30: sum30,
@@ -214,7 +213,7 @@ class inventoryController {
               ) {
                 console.log("overstock warning");
                 let alert = await alertService.findAlert({
-                  sku: skuObj.sku,
+                  sku: skuObj.SKU,
                   user: req.userId,
                   type: "overstock",
                 });
@@ -222,18 +221,18 @@ class inventoryController {
                   console.log("overstock alert nahi mila");
                   await alertService.createAlert({
                     user: req.userId,
-                    sku: skuObj.sku,
-                    description: skuObj.description,
-                    quantity: inventory.stock,
+                    sku: skuObj.SKU,
+                    description: skuObj.ProductTitle,
+                    quantity: skuObj.Inventory_Total,
                     weeklyDemand: sum7,
                     stockOutDate: Date.now(),
                     type: "overstock",
                   });
                 } else {
                   await alertService.updateAlert(
-                    { sku: skuObj.sku, user: req.userId, type: "overstock" },
+                    { sku: skuObj.SKU, user: req.userId, type: "overstock" },
                     {
-                      quantity: inventory.stock,
+                      quantity: skuObj.Inventory_Total,
                       weeklyDemand: sum7,
                       stockOutDate: Date.now(),
                     }
@@ -244,16 +243,16 @@ class inventoryController {
               if (reorderAlert !== alertMessage2) {
                 const match = reorderAlert.match(/Day (\d+)/);
                 let alert = await alertService.findAlert({
-                  sku: skuObj.sku,
+                  sku: skuObj.SKU,
                   user: req.userId,
                   type: "reorder",
                 });
                 if (!alert) {
                   await alertService.createAlert({
                     user: req.userId,
-                    sku: skuObj.sku,
-                    description: skuObj.description,
-                    quantity: inventory.stock,
+                    sku: skuObj.SKU,
+                    description: skuObj.ProductTitle,
+                    quantity: skuObj.Inventory_Total,
                     weeklyDemand: sum7,
                     type: "reorder",
                     stockOutDate:
@@ -261,9 +260,9 @@ class inventoryController {
                   });
                 } else {
                   await alertService.updateAlert(
-                    { sku: skuObj.sku, user: req.userId, type: "reorder" },
+                    { sku: skuObj.SKU, user: req.userId, type: "reorder" },
                     {
-                      quantity: inventory.stock,
+                      quantity: skuObj.Inventory_Total,
                       weeklyDemand: sum7,
                       stockOutDate:
                         Date.now() +
@@ -274,24 +273,24 @@ class inventoryController {
               }
 
               // subtract forecasted demand from current inventory untill stockout
-              let currentStock = inventory.stock;
+              let currentStock = skuObj.Inventory_Total;
               for (const day of forecastData) {
-                inventory.stock -= day.forecast;
-                if (inventory.stock <= 0) {
-                  console.log("stockout ho gaya", inventory.stock);
+                skuObj.Inventory_Total -= day.forecast;
+                if (skuObj.Inventory_Total <= 0) {
+                  console.log("stockout ho gaya", skuObj.Inventory_Total);
                   console.log("day:", day);
                   // create alert for stockout
                   let alert = await alertService.findAlert({
-                    sku: skuObj.sku,
+                    sku: skuObj.SKU,
                     user: req.userId,
                     type: "stockout",
                   });
                   console.log("alert:", alert);
                   if (!alert) {
                     await alertService.createAlert({
-                      sku: skuObj.sku,
+                      sku: skuObj.SKU,
                       user: req.userId,
-                      description: skuObj.description,
+                      description: skuObj.ProductTitle,
                       quantity: currentStock,
                       weeklyDemand: day.forecast,
                       type: "stockout",
@@ -312,14 +311,14 @@ class inventoryController {
               }
               // 7. Save or Update Forecast
               const existingForecast = await forcastServices.findForcast({
-                sku: skuObj.sku,
+                sku: skuObj.SKU,
                 userId: req.userId,
               });
 
               if (existingForecast) {
                 console.log("existing forecast mili");
                 await forcastServices.updateForcast(
-                  { sku: skuObj.sku, userId: req.userId },
+                  { sku: skuObj.SKU, userId: req.userId },
                   forecastPayloadForDB
                 );
               } else {

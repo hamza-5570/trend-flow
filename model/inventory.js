@@ -51,10 +51,10 @@ const inventorySchema = new Schema(
       type: Number,
       default: 20,
     },
-    reorderPoint: {
-      type: Number,
-      required: true,
-    },
+    // reorderPoint: {
+    //   type: Number,
+    //   required: true,
+    // },
   },
   { timestamps: true }
 );
