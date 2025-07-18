@@ -11,12 +11,7 @@ connectDB();
 // app.use(express.json());
 app.use(express.json({ urlencoded: true }));
 
-app.use(
-  cors({
-    origin: true, // Allow all origins
-    credentials: true,
-  })
-);
+app.use(cors("*"));
 
 // app.use(cors({ origin: 'https://tren-flow.vercel.app' }));
 app.use(morgan("tiny"));
