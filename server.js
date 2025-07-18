@@ -7,16 +7,8 @@ import multer from "multer";
 import morgan from "morgan";
 
 connectDB();
-
-// app.use(express.json());
 app.use(express.json({ urlencoded: true }));
-
 app.use(cors("*"));
-
-// app.use(cors({ origin: 'https://tren-flow.vercel.app' }));
-app.use(morgan("tiny"));
-
-const upload = multer({ dest: "uploads/" });
 
 app.get("/", (req, res) => {
   res.send("Welcome to Ecommerce APIs");
