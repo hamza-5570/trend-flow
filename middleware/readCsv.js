@@ -9,9 +9,14 @@ const upload = multer({ storage });
 
 // Helper to sanitize BOM from headers
 const sanitizeHeaders = (row) => {
+  console.log("Sanitizing headers:", row);
   const sanitized = {};
   for (const key in row) {
-    const cleanKey = key.replace(/^\uFEFF/, "").trim(); // Remove BOM and trim
+    // Remove BOM, double quotes, and trim spaces
+    const cleanKey = key
+      .replace(/^\uFEFF/, "")
+      .replace(/^"+|"+$/g, "")
+      .trim();
     sanitized[cleanKey] = row[key];
   }
   return sanitized;

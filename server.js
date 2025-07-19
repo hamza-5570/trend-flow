@@ -3,8 +3,6 @@ const app = express();
 import cors from "cors";
 import routes from "./routes/routes.js";
 import connectDB from "./config/database.js";
-import multer from "multer";
-import morgan from "morgan";
 
 connectDB();
 app.use(express.json({ urlencoded: true }));
