@@ -19,23 +19,23 @@ class saleController {
       };
       let uniqueSkus = [];
       const forecastBaseUrl = "https://stock-ml-model.onrender.com";
-      const form = new FormData();
+      // const form = new FormData();
 
-      form.append("file", req.file.buffer, {
-        filename: req.file.originalname,
-        contentType: req.file.mimetype,
-      });
+      // form.append("file", req.file.buffer, {
+      //   filename: req.file.originalname,
+      //   contentType: req.file.mimetype,
+      // });
 
-      await axios
-        .post(`${forecastBaseUrl}/upload-train-data/`, form, {
-          headers: {
-            authorization: "hashbin2",
-          },
-        })
-        .catch((error) => {
-          return Response.serverError(res, error);
-        });
-      console.log("train ho gaya");
+      // await axios
+      //   .post(`${forecastBaseUrl}/upload-train-data/`, form, {
+      //     headers: {
+      //       authorization: "hashbin2",
+      //     },
+      //   })
+      //   .catch((error) => {
+      //     return Response.serverError(res, error);
+      //   });
+      // console.log("train ho gaya");
       await Promise.all(
         req.csvData.map(async (sale) => {
           let product = await productService.findProduct({
