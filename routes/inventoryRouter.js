@@ -4,6 +4,9 @@ import inventoryController from "../controller/inventoryController.js";
 // import inventoryValid from "../validation/inventoryValid.js";
 import { csvUploadMiddleware } from "../middleware/readCsv.js";
 import checkToken from "../middleware/auth.js";
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 routes.post(
   "/create",

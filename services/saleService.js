@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 import Sale from "../model/sale.js";
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+
 class saleCRUD {
   createSale = async (query) => {
     return await Sale.create(query);
@@ -126,7 +130,7 @@ class saleCRUD {
             currentInventory: "$inventory.currentInventory",
             stockInDate: "$inventory.stockInDate",
             // Product fields
-            productTitle: "$product.title",
+            productTitle: "$product.description",
             category: "$product.category",
             subcategory: "$product.subcategory",
             material: "$product.material",

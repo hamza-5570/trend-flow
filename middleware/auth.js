@@ -1,5 +1,8 @@
 "use strict";
 import jwtHelper from "../utilities/jwt.js";
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 let checkToken = (req, res, next) => {
   let token = req.header("x-auth-token"); // in header token will be send in "x-auth-token" variable
